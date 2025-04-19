@@ -1,0 +1,157 @@
+.grid__row{
+    flex-direction: column;
+}
+
+.cart__container{
+    background-color: var(--white-color);
+    padding: 20px;
+    margin-top: 24px;
+    border-radius: 8px;
+}
+
+.cart__container-header{
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.cart__container-icon{
+    font-size: 2.4rem;
+}
+
+.cart__container-heading{
+    font-size: 2rem;
+    margin: 2px 12px 0;
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 2.4rem;
+}   
+
+.cart__container-header::after{
+    content: "";
+    border: 1px solid var(--border-color);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+/* product */
+.cart__container-products{
+    padding-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.4rem;
+    }
+
+  /* Đường viền bảng */
+    table, th, td {
+        border: 1px solid black;
+    }
+    
+  /* Các ô tiêu đề */
+    th {
+        background-color: #f2f2f2;
+        text-align: center;
+        padding: 8px;
+    }
+
+  /* Các ô dữ liệu */
+    td {
+        text-align: center;
+        padding: 8px;
+    }
+
+    td.product-name{
+        text-align: left;
+    }
+
+  /* Các ô số thứ tự */
+    .product-num {
+        width: 5%;
+    }
+
+  /* Các ô tên sản phẩm */
+    .product-name {
+        width: 20%;
+    }
+
+  /* Các ô ảnh sản phẩm */
+    .product-img {
+        width: 15%;
+    }
+
+    .product-img img{
+        width: 100px;
+        /* height: 50%; */
+    }
+
+  /* Các ô đơn giá */
+    .product-price {
+        width: 10%;
+    }
+
+  /* Các ô số lượng */
+    .product-quantity {
+        width: 10%;
+    }
+
+  /* Các ô thành tiền */
+    .product-total {
+        width: 10%;
+    }
+
+  /* Các ô xoá */
+    .product-del {
+        width: 10%;
+        text-transform: capitalize;
+    }
+
+    .product-status{
+        color: #0ec017;
+        text-transform: capitalize;
+    }
+
+    .cart__container-payment {
+        margin-left: auto;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .cart__container-payment:hover {
+        background-color: #45a049;
+    }
+
+    .cart__container-payment-icon{
+        padding-left: 5px;
+    }
+    
+
+/* del-btn */
+.product-del-button {
+    background-color: #ff0000; /* Màu nền của nút */
+    color: #fff; /* Màu chữ */
+    border: none; /* Không có viền */
+    padding: 5px 10px; /* Khoảng cách bên trong của nút */
+    cursor: pointer; /* Con trỏ chuột khi hover */
+    border-radius: 5px; /* Bo góc */
+}
+
+.product-del-button:hover {
+    background-color: #cc0000; /* Màu nền khi hover */
+}
+
+.product-del-icon {
+    margin-left: 5px; /* Khoảng cách giữa biểu tượng và chữ */
+}

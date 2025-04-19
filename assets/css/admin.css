@@ -1,0 +1,310 @@
+body{
+    background-color: var(--white-color) !important;
+}
+
+.header__navbar-user-menu{
+    top:90%;
+}
+
+.header__navbar-item{
+    display: flex;
+    align-items: center;
+    /* justify-content: flex-end; */
+}
+
+.header__navbar-item-link {
+    margin-left: 700px;
+
+}
+
+.category-item__link {
+    line-height: 1.6rem;
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.4rem;
+    padding: 6px 16px;
+    display: block;
+    position: relative;
+    right: 0;
+    transition: right linear 0.1s;
+}
+
+.category-item__link::before{
+    content: "";
+    border-color: transparent transparent transparent var(--primary-color);
+}
+
+.category-item__link.category-item__link--active {
+    right: -4px;
+    color: var(--primary-color);
+    content: "";
+    border-color: transparent transparent transparent var(--primary-color);
+    pointer-events: none;
+}
+
+.category {
+    background-color: var(--white-color);
+    border-radius: 2px;
+}
+
+.app__container {
+    background-color: var(--white-color);
+}
+
+/* Task */
+
+.header__task{
+    flex: 1;
+}
+
+.header__task-list{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style-type: none;
+}
+
+.header__task-link{
+    text-decoration: none;
+    color: var(--white-color);
+    font-size: 1.6rem;
+    padding: 10px;
+}
+
+.header__task-link:hover{
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.category-item__link{
+    background-color: #fff;
+}
+
+
+/* Form styles */
+.gen__book-form-container {
+    display: flex;
+    align-items: center;
+}
+
+.gen__book-form-input {
+    flex-grow: 1; /* Chiếm hết không gian còn lại */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.gen__book-form-submit.gen__book-form-submit--disabled{
+    background-color: #013771;
+    pointer-events: none;
+}
+
+.gen__book-form-submit,
+.gen__book-form-view-all,
+.gen__book-form-input {
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+.gen__book-form-submit,
+.gen__book-form-view-all {
+    padding: 8px 12px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.gen__book-form-submit:hover,
+.gen__book-form-view-all:hover {
+    background-color: #0056b3;
+}
+/* Table styles */
+.genBook__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 1.3rem;
+}
+
+.genBook__table th,
+.genBook__table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.genBook__table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.genBook__table td {
+    background-color: #f9f9f9;
+}
+
+.genBook__table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.genBook__table tr:hover {
+    background-color: #ddd;
+}
+
+
+/* ADD-PRODUCT */
+/* Form styles */
+.add_book {
+    width: 100%;
+    max-width: 600px; /* Điều chỉnh độ rộng tối đa của form */
+    margin: 0 auto; /* Để căn giữa form */
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.4rem;
+}
+
+.add_book-header {
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.add_book-header::after {
+    content: "";
+    position: absolute;
+    border: 1px solid var(--border-color);
+    bottom: -20px;
+    left: 0;
+    right: 0;
+}
+
+.add_book-header label {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.addBook__form-container {
+    margin-bottom: 20px;
+}
+
+.addBook__form-table {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.addBook__form-label {
+    padding: 8px;
+    font-weight: bold;
+}
+
+.addBook__form-data {
+    padding: 8px;
+}
+
+.addBook__form-input,
+.addBook__form-select {
+    width: calc(100% - 16px); /* Điều chỉnh độ rộng của input/select */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.addBook__form-submit {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.addBook__form-submit:hover {
+    background-color: #0056b3;
+}
+
+/* UPDATE-PRODUCT */
+/* Table styles */
+.bookTable {
+    font-size: 1.3rem;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bookTable th,
+.bookTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+
+}
+
+.bookTable th {
+    background-color: #007bff;
+    color: var(--white-color);
+}
+
+.bookTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.bookTable tr:hover {
+    background-color: #f2f2f2;
+}
+
+/* Input styles */
+.new_amount {
+    width: 50px; /* Điều chỉnh độ rộng của input */
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    text-align: center;
+}
+
+.new_amount::-webkit-inner-spin-button,
+.new_amount::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Loại bỏ spinner trong Chrome và Safari */
+    appearance: none;
+}
+
+/* Button styles */
+.submit-btn {
+    padding: 6px 10px;
+    background-color: #4CAF50;
+    color: var(--white-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+
+/* DELETE - PRODUCT */
+/* CSS cho cột book-delete */
+.bookTable .book-delete {
+    text-align: center;
+}
+
+.bookTable .book-delete .btn-del {
+    padding: 6px 10px;
+    background-color: #ff0000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.bookTable .book-delete .btn-del:hover {
+    background-color: #d22d00;
+}
+
+/* Đảm bảo biểu tượng trash icon được căn giữa */
+.bookTable .book-delete .btn-del i {
+    vertical-align: middle;
+}
