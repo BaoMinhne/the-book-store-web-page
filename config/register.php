@@ -51,15 +51,38 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
         exit();
     }
 
-    $registration = $conn->prepare('CALL p_register(?, ?)');
+    if ($useLegacyTable) {
+        $registration = $conn->prepare('INSERT INTO userinfos (userName, userPass, userRole) VALUES (?, ?, 0)');
+        if (!$registration) {
+            echo "<script>alert('Đăng ký thất bại.'); window.location.href = '../index.php';</script>";
+            exit();
+        }
 
-    if (!$registration) {
-        echo "<script>alert('Đăng ký thất bại.'); window.location.href = '../index.php';</script>";
-        exit();
+        $registration->bind_param('ss', $username, $password);
+        $result = $registration->execute();
+    } else {
+        $conn->begin_transaction();
+        $result = false;
+
+        $stmtUser = $conn->prepare('INSERT INTO USERS (USER_Name, USER_Password) VALUES (?, ?)');
+        if ($stmtUser) {
+            $stmtUser->bind_param('ss', $username, $password);
+            if ($stmtUser->execute()) {
+                $newUserId = (int) $conn->insert_id;
+                $stmtRole = $conn->prepare('INSERT INTO USER_ROLE (USER_ID, UR_ROLE) VALUES (?, 0)');
+                if ($stmtRole) {
+                    $stmtRole->bind_param('i', $newUserId);
+                    $result = $stmtRole->execute();
+                }
+            }
+        }
+
+        if ($result) {
+            $conn->commit();
+        } else {
+            $conn->rollback();
+        }
     }
-
-    $registration->bind_param('ss', $username, $password);
-    $result = $registration->execute();
 
     if ($result) {
         $_SESSION['username'] = $username;
