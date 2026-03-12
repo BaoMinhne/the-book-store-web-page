@@ -8,6 +8,10 @@ if (!isset($_SESSION['username'])) {
     header("Location: ./index.php");
     exit(); // Dừng kịch bản hiện tại
 }
+
+$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$productRenderOutput = '';
+$productRenderErrors = [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -289,7 +293,23 @@ if (!isset($_SESSION['username'])) {
                             <!-- grid -> row -> col -->
                             <div class="grid__row">
                                 <?php
-                                include './catetory_product-list.php'
+                                if ($debugMode) {
+                                    set_error_handler(static function ($severity, $message, $file, $line) use (&$productRenderErrors): bool {
+                                        $productRenderErrors[] = "[{$severity}] {$message} at {$file}:{$line}";
+
+                                        return false;
+                                    });
+                                }
+
+                                ob_start();
+                                include './catetory_product-list.php';
+                                $productRenderOutput = ob_get_clean();
+
+                                if ($debugMode) {
+                                    restore_error_handler();
+                                }
+
+                                echo $productRenderOutput;
                                 ?>
                             </div>
                         </div>
@@ -308,7 +328,20 @@ if (!isset($_SESSION['username'])) {
     </div>
 
 
+
+    <?php if ($debugMode): ?>
+        <div style="position:fixed;right:12px;bottom:12px;z-index:99999;background:#111;color:#fff;max-width:520px;max-height:45vh;overflow:auto;padding:12px;border-radius:8px;font-size:12px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+            <strong>[DEBUG homepage.php]</strong><br>
+            User: <?= htmlspecialchars((string) ($_SESSION['username'] ?? ''), ENT_QUOTES, 'UTF-8'); ?><br>
+            Product HTML length: <?= strlen($productRenderOutput); ?><br>
+            PHP include warnings: <?= count($productRenderErrors); ?><br>
+            <?php if (!empty($productRenderErrors)): ?>
+                <pre style="white-space:pre-wrap;color:#ffb4b4;"><?= htmlspecialchars(implode("\n", $productRenderErrors), ENT_QUOTES, 'UTF-8'); ?></pre>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 </body>
+
 
 
 
@@ -336,6 +369,24 @@ if (!isset($_SESSION['username'])) {
             cartList.classList.remove('header__cart-list--no-cart');
         }
     });
+
+    <?php if ($debugMode): ?>
+    window.addEventListener('error', function(event) {
+        console.error('[DEBUG][window.error]', {
+            message: event.message,
+            source: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            stack: event.error ? event.error.stack : null
+        });
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        console.error('[DEBUG][unhandledrejection]', event.reason);
+    });
+
+    console.warn('[DEBUG] Nếu bạn thấy lỗi "Unchecked runtime.lastError...", thường là từ extension trình duyệt, không phải PHP app.');
+    <?php endif; ?>
 
     const container = document.querySelector('.app__container');
     container.addEventListener('click', function() {
