@@ -89,9 +89,11 @@ if ($result && mysqli_num_rows($result) > 0) {
         $bookPrice = (int) ($row['bookPrice'] ?? 0);
         $formattedPrice = number_format($bookPrice, 0, ',', '.');
         echo '<div class="grid__column-2-4">';
+        $imageRaw = trim((string) ($row['bgURL'] ?? ''));
+        $safeImage = $imageRaw !== '' ? $imageRaw : asset_url('assets/img/logo/logo2.png');
         echo '<a class="home-product-item" href="detailProduct.php?id=' . $row['bookID'] . '">';
-        echo '<div class="home-product-item__img" style="background-image: url(' . $row['bgURL'] . ');"></div>';
-        echo '<h4 class="home-product-item__name">' . $row['bookName'] . '</h4>';
+        echo '<div class="home-product-item__img" style="background-image: url(' . htmlspecialchars($safeImage, ENT_QUOTES) . ');"></div>';
+        echo '<h4 class="home-product-item__name">' . htmlspecialchars((string) $row['bookName']) . '</h4>';
         echo '<div class="home-product-item__price">';
         echo '<span class="home-product-item__price-new">' . $formattedPrice . 'đ</span>';
         echo '</div>';
