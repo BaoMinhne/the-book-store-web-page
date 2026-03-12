@@ -1,5 +1,6 @@
 <?php
 include './config/db_connection.php';
+include './config/url_helper.php';
 
 session_start();
 if (!isset($_SESSION['username'])) {
@@ -14,10 +15,10 @@ if (!isset($_SESSION['username'])) {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/base.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/main.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/base.css'); ?>">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/main.css'); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../Shop_project/assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="../Shop_project/assets/img/logo/4482549.jpg">
     <title>BookLand</title>
