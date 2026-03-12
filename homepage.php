@@ -199,49 +199,51 @@ $catalogDebug = [];
                                 Danh mục
                             </h3>
 
+                            <?php $currentCategory = $_GET['category'] ?? 'all'; ?>
+
                             <ul class="category-list">
                                 <li class="category-item">
-                                    <a href="homepage.php?category=all" class="category-item__link">Sản phẩm</a>
+                                    <a href="homepage.php?category=all" class="category-item__link <?= $currentCategory === 'all' ? 'category-item__link--active' : ''; ?>">Sản phẩm</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=sach_giao_khoa" class="category-item__link">Sách giáo khoa</a>
+                                    <a href="homepage.php?category=sach_giao_khoa" class="category-item__link <?= $currentCategory === 'sach_giao_khoa' ? 'category-item__link--active' : ''; ?>">Sách giáo khoa</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=tieu_thuyet" class="category-item__link">Tiểu thuyết</a>
+                                    <a href="homepage.php?category=tieu_thuyet" class="category-item__link <?= $currentCategory === 'tieu_thuyet' ? 'category-item__link--active' : ''; ?>">Tiểu thuyết</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=truyen_tranh" class="category-item__link">Truyện tranh</a>
+                                    <a href="homepage.php?category=truyen_tranh" class="category-item__link <?= $currentCategory === 'truyen_tranh' ? 'category-item__link--active' : ''; ?>">Truyện tranh</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=kinh_doanh" class="category-item__link">Kinh doanh</a>
+                                    <a href="homepage.php?category=kinh_doanh" class="category-item__link <?= $currentCategory === 'kinh_doanh' ? 'category-item__link--active' : ''; ?>">Kinh doanh</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=khoa_hoc" class="category-item__link">Khoa học</a>
+                                    <a href="homepage.php?category=khoa_hoc" class="category-item__link <?= $currentCategory === 'khoa_hoc' ? 'category-item__link--active' : ''; ?>">Khoa học</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=giao_trinh" class="category-item__link">Giáo trình</a>
+                                    <a href="homepage.php?category=giao_trinh" class="category-item__link <?= $currentCategory === 'giao_trinh' ? 'category-item__link--active' : ''; ?>">Giáo trình</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=y_hoc" class="category-item__link">Y học</a>
+                                    <a href="homepage.php?category=y_hoc" class="category-item__link <?= $currentCategory === 'y_hoc' ? 'category-item__link--active' : ''; ?>">Y học</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=tham_khao" class="category-item__link">Sách tham khảo</a>
+                                    <a href="homepage.php?category=tham_khao" class="category-item__link <?= $currentCategory === 'tham_khao' ? 'category-item__link--active' : ''; ?>">Sách tham khảo</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=cong_nghe" class="category-item__link">Công nghệ</a>
+                                    <a href="homepage.php?category=cong_nghe" class="category-item__link <?= $currentCategory === 'cong_nghe' ? 'category-item__link--active' : ''; ?>">Công nghệ</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=lich_su" class="category-item__link">Lịch sử</a>
+                                    <a href="homepage.php?category=lich_su" class="category-item__link <?= $currentCategory === 'lich_su' ? 'category-item__link--active' : ''; ?>">Lịch sử</a>
                                 </li>
                             </ul>
                         </nav>
