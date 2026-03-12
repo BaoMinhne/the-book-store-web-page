@@ -170,9 +170,8 @@ function seed_new_schema(mysqli $conn): void
         $conn->query("UPDATE USERS SET USER_Password = '123456' WHERE USER_Name = 'customer01' AND (USER_Password IS NULL OR USER_Password = '')");
     }
 
-    if (!seed_has_procedure($conn, 'p_register')) {
-        $conn->query("CREATE PROCEDURE p_register(IN p_userName VARCHAR(255), IN p_userPass VARCHAR(255))\nBEGIN\n    INSERT INTO USERS (USER_Name, USER_Password) VALUES (p_userName, p_userPass);\n    INSERT INTO USER_ROLE (USER_ID, UR_ROLE) VALUES (LAST_INSERT_ID(), 0);\nEND");
-    }
+    $conn->query('DROP PROCEDURE IF EXISTS p_register');
+    $conn->query("CREATE PROCEDURE p_register(IN p_userName VARCHAR(255), IN p_userPass VARCHAR(255))\nBEGIN\n    INSERT INTO USERS (USER_Name, USER_Password) VALUES (p_userName, p_userPass);\n    INSERT INTO USER_ROLE (USER_ID, UR_ROLE) VALUES (LAST_INSERT_ID(), 0);\nEND");
 
     if (!seed_has_procedure($conn, 'p_view_gen_books')) {
         $conn->query("CREATE PROCEDURE p_view_gen_books(IN p_genName VARCHAR(255))\nBEGIN\n    SELECT b.BOOK_ID AS MaSach, b.BOOK_Name AS bookName, b.BOOK_PRICE AS bookPrice, b.BOOK_Amount AS bookQuantity, g.GEN_Name AS genName\n    FROM BOOKS b\n    JOIN GENRES g ON b.GEN_ID = g.GEN_ID\n    WHERE g.GEN_Name LIKE p_genName;\nEND");

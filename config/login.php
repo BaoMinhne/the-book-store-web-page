@@ -23,9 +23,9 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
     }
 
     if ($useLegacyTable) {
-        $sql_query = $conn->prepare('SELECT userName, userRole, userPass FROM userInfos WHERE userName = ? LIMIT 1');
+        $sql_query = $conn->prepare('SELECT userName, userRole, userPass FROM userinfos WHERE userName = ? LIMIT 1');
     } else {
-        $sql_query = $conn->prepare('SELECT u.USER_Name AS userName, ur.UR_ROLE AS userRole, u.USER_Password AS userPass FROM USERS u JOIN USER_ROLE ur ON ur.USER_ID = u.USER_ID WHERE u.USER_Name = ? LIMIT 1');
+        $sql_query = $conn->prepare('SELECT u.USER_Name AS userName, COALESCE(ur.UR_ROLE, 0) AS userRole, u.USER_Password AS userPass FROM USERS u LEFT JOIN USER_ROLE ur ON ur.USER_ID = u.USER_ID WHERE u.USER_Name = ? LIMIT 1');
     }
 
     if (!$sql_query) {
