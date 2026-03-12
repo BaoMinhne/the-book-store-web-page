@@ -158,11 +158,12 @@ function seed_legacy_procedures(mysqli $conn): void
 function seed_new_schema(mysqli $conn): void
 {
     seed_exec_sql_file($conn, 'database/seeds/01_schema.sql');
-    seed_exec_sql_file($conn, 'database/seeds/02_seed_data.sql');
 
     if (seed_has_table($conn, 'USERS') && !seed_has_column($conn, 'USERS', 'USER_Password')) {
         $conn->query("ALTER TABLE USERS ADD COLUMN USER_Password VARCHAR(255) NOT NULL DEFAULT '' AFTER USER_Name");
     }
+
+    seed_exec_sql_file($conn, 'database/seeds/02_seed_data.sql');
 
     if (seed_has_column($conn, 'USERS', 'USER_Password')) {
         $conn->query("UPDATE USERS SET USER_Password = 'admin123' WHERE USER_Name = 'admin' AND (USER_Password IS NULL OR USER_Password = '')");
