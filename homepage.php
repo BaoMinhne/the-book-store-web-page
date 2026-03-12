@@ -109,33 +109,24 @@ if (!isset($_SESSION['username'])) {
                                 <i class="header__navbar-icon fa-regular fa-circle-question"></i> Trợ giúp</a>
                         </li>
 
-                        <!-- Not Login -->
-                        <div id="not-login__section" style="display: flex;">
-                            <li class="header__navbar-item header__navbar-item-register header__navbar-item--strong header__navbar-item--separate ">Đăng ký</li>
-                            <li class="header__navbar-item header__navbar-item-login header__navbar-item--strong">Đăng nhập</li>
-                        </div>
+                        <li class="header__navbar-item header__navbar-user">
+                            <img src="<?= asset_url('assets/img/user-img/blank.jpg'); ?>" alt="" class="header__navbar-user-img">
+                            <span class="header__navbar-user-name"><?= htmlspecialchars($_SESSION['username'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
 
-                        <!-- After Login -->
-                        <div id="after-login__section" style="display: none;">
-                            <li class="header__navbar-item header__navbar-user">
-                                <img src="<?= asset_url('assets/img/user-img/blank.jpg'); ?>" alt="" class="header__navbar-user-img">
-                                <span class="header__navbar-user-name">Khúc Bảo Minh</span>
+                            <ul class="header__navbar-user-menu">
+                                <li class="header__navbar-user-item">
+                                    <a href="./personalPage.php">Tài khoản của tôi</a>
+                                </li>
 
-                                <ul class="header__navbar-user-menu">
-                                    <li class="header__navbar-user-item">
-                                        <a href="./personalPage.php">Tài khoản của tôi</a>
-                                    </li>
+                                <li class="header__navbar-user-item">
+                                    <a href="./cart.php">Đơn mua</a>
+                                </li>
 
-                                    <li class="header__navbar-user-item">
-                                        <a href="./cart.php">Đơn mua</a>
-                                    </li>
-
-                                    <li class="header__navbar-user-item header__navbar-user-item--seperate">
-                                        <a href="<?= asset_url('config/logout.php'); ?>" onclick="return confirmLogOut();">Đăng xuất</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </div>
+                                <li class="header__navbar-user-item header__navbar-user-item--seperate">
+                                    <a href="<?= asset_url('config/logout.php'); ?>" onclick="return confirmLogOut();">Đăng xuất</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
 
@@ -323,23 +314,6 @@ if (!isset($_SESSION['username'])) {
 
 <!-- After Login Logic -->
 <script>
-    var username = "<?php echo isset($_SESSION['username']) ? $_SESSION['username'] : ''; ?>";
-
-    if (username !== '' && username != 'admin') {
-        // Hiện phần after-login__section
-        document.getElementById("after-login__section").style.display = "flex";
-        // Ẩn phần not-login__section
-        document.getElementById("not-login__section").style.display = "none";
-        // Hiển thị username
-        document.querySelector(".header__navbar-user-name").textContent = username;
-        console.log("Đăng nhập thành công");
-    } else {
-        // Người dùng chưa đăng nhập, hiển thị phần not-login__section và ẩn phần after-login__section
-        document.getElementById("not-login__section").style.display = "flex";
-        document.getElementById("after-login__section").style.display = "none";
-        console.log('Người dùng chưa đăng nhập');
-    }
-
     function confirmLogOut() {
         return window.confirm("Bạn Có Muốn Đăng Xuất Hay Không???");
     }
