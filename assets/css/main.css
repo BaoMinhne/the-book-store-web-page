@@ -1066,12 +1066,12 @@
 
 /* Product item */
 .home-product-item{
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     margin-top: 12px;
     position: relative;
-    border-radius: 14px;
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+    border-radius: 18px;
+    border: 1px solid #e5eaf4;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
     transition: transform linear 0.15s, box-shadow linear 0.15s;
     will-change: transform;
     display: block;
@@ -1084,33 +1084,33 @@
 }
 
 .home-product-item:hover{
-    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.16);
-    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(30, 64, 175, 0.16);
+    transform: translateY(-3px);
 }
 
 .home-product-item__img{
-    margin: 12px;
-    padding-top: calc(100% - 24px);
-    border-radius: 12px;
+    margin: 12px 12px 10px;
+    padding-top: calc(100% - 22px);
+    border-radius: 14px;
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
     background-position: center;
-    background-color: #f8fafc;
-    border: 1px solid #eef2ff;
+    background-color: #f1f5f9;
+    border: 1px solid #e6edf8;
 }
 
 .home-product-item__name{
-    font-size: 1.55rem;
-    font-weight: 500;
-    color: #1f2937;
-    line-height: 2.1rem;
-    height: 4.2rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 2.4rem;
+    min-height: 4.8rem;
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     text-overflow: ellipsis;
-    margin: 2px 12px 10px;
+    margin: 0 12px 10px;
 }
 
 .home-product-item__price{
@@ -1121,29 +1121,30 @@
 }
 
 .home-product-item__price-new{
-    font-size: 3rem;
+    font-size: 4rem;
     color: #2563eb;
-    font-weight: 700;
-    letter-spacing: -0.2px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1;
 }
 
 .home-product-item__action {
     display: flex;
     align-items: center;
-    margin: 10px 12px 8px;
-    gap: 6px;
+    margin: 10px 12px 10px;
+    gap: 8px;
 }
 
 /* Like CSS */
 .home-product-item__like{
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background-color: #ffe4e6;
-    font-size: 1.3rem;
+    font-size: 1.45rem;
     cursor: pointer;
 }
 
@@ -1161,9 +1162,9 @@ i.home-product-item__like-icon-fill{
 }
 
 .home-product-item__rating{
-    font-size: 1.05rem;
+    font-size: 1.35rem;
     color: #fcd34d;
-    margin-left: auto;
+    margin-left: 2px;
     letter-spacing: 1px;
 }
 
@@ -1172,24 +1173,25 @@ i.home-product-item__like-icon-fill{
 }
 
 .home-product-item__sold{
-    font-size: 1.35rem;
+    font-size: 1.9rem;
     color: #334155;
-    font-weight: 500;
-    margin-left: 4px;
+    font-weight: 600;
+    margin-left: auto;
+    line-height: 1;
 }
 
 div.home-product-item__origin{
     display: flex;
     margin: 0 12px 12px;
     color: #64748b;
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     border-top: 1px dashed #e2e8f0;
-    padding-top: 9px;
+    padding-top: 10px;
 }
 
 .home-product-item__brand{
     margin-right: auto;
-    font-weight: 500;
+    font-weight: 700;
 }
 
 span.home-product-item__origin{
@@ -1199,14 +1201,14 @@ span.home-product-item__origin{
 /* thẻ yêu thích cho sản phẩm */
 .home-product-item__favourite{
     position: absolute;
-    top: 14px;
-    left: 12px;
+    top: 18px;
+    left: 16px;
     color: #1d4ed8;
     background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     font-weight: 600;
-    line-height: 1.8rem;
-    padding: 2px 8px;
+    line-height: 2rem;
+    padding: 4px 10px;
     border-radius: 999px;
     box-shadow: 0 8px 16px rgba(37, 99, 235, 0.28);
 }
@@ -1221,8 +1223,8 @@ span.home-product-item__origin{
 }
 
 .home-product-item__favourite i{
-    font-size: 0.95rem;
-    margin: 0 3px 0 0;
+    font-size: 1.1rem;
+    margin: 0 4px 0 0;
 }
 
 /* Thẻ giảm giá cho sản phẩm */
