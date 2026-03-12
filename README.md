@@ -106,6 +106,22 @@ Access URL: `http://localhost:3000/index.php`
 └── payment.php             # Payment handler
 ```
 
+
+## Auto Seed Database
+
+Hệ thống sẽ tự động seed dữ liệu khi khởi tạo kết nối DB trong `config/db_connection.php`.
+
+### Các file seed
+- `config/auto_seed.php`: seed runner (tự nhận diện schema cũ/mới).
+- `database/seeds/01_schema.sql`: tạo schema theo mô hình ERD bạn cung cấp (`BOOKS`, `GENRES`, `ORIGINS`, `NATIONS`, `PUBLISHERS`, `USERS`, `USER_ROLE`, `ORDERS`, `DETAIL_ORDERS`).
+- `database/seeds/02_seed_data.sql`: dữ liệu mẫu idempotent (chạy nhiều lần không tạo trùng).
+
+### Cơ chế hoạt động
+- Nếu DB đang dùng **schema cũ** của project (`userinfos`, `books`, ...), hệ thống seed theo schema cũ và bổ sung stored procedures tương thích.
+- Nếu không có schema cũ, hệ thống tự tạo + seed theo **schema ERD mới** từ file SQL.
+
+> Muốn tắt auto-seed ở production: comment dòng `run_auto_seed($conn);` trong `config/db_connection.php`.
+
 ## License
 
 MIT License

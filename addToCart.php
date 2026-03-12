@@ -2,63 +2,63 @@
 session_start();
 include './config/db_connection.php';
 
+$bID = intval($_POST['productId'] ?? 0);
+
 if (!isset($_SESSION['username'])) {
-    $bID = intval($_POST['productId']);
-
-    echo "<script> alert('Vui Lòng Đăng Nhập Trước.'); 
+    echo "<script>
+        alert('Vui Lòng Đăng Nhập Trước.');
         var ID = $bID;
-        window.location.href = 'detailProduct.php?id=' + ID;</script>";
-
-    exit(); // Thêm dòng này để ngăn mã tiếp tục thực thi
+        window.location.href = 'detailProduct.php?id=' + ID;
+    </script>";
+    exit();
 }
 
-if (isset($_SESSION['username'])) {
-    $uname = $_SESSION['username'];
+$uname = $_SESSION['username'];
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['productId'], $_POST['quantity'])) {
+        $bID = intval($_POST['productId']);
+        $amount = intval($_POST['quantity']);
 
-        if (isset($_POST['productId']) && isset($_POST['quantity'])) {
+        $checkAmountStmt = $conn->prepare('SELECT bookQuantity FROM books WHERE bookID = ? LIMIT 1');
+        $checkAmountStmt->bind_param('i', $bID);
+        $checkAmountStmt->execute();
+        $checkAmount = $checkAmountStmt->get_result();
 
-            $bID = intval($_POST['productId']);
-            $amount = intval($_POST['quantity']);
+        if ($checkAmount && $checkAmount->num_rows === 1) {
+            $row = mysqli_fetch_assoc($checkAmount);
+            $bQuantity = (int) $row['bookQuantity'];
 
-            // Truy vấn số lượng sách hiện có
-            $sql_query = "SELECT bookQuantity from books where bookID = '$bID'";
-            $checkAmount = mysqli_query($conn, $sql_query);
+            if ($amount > $bQuantity) {
+                echo "<script>
+                    var ID = $bID;
+                    window.location.href = 'detailProduct.php?id=' + ID;
+                    alert('Sản Phẩm Không Đủ Số Lượng!');
+                </script>";
+                exit();
+            }
 
-            if ($checkAmount) {
-                $row = mysqli_fetch_assoc($checkAmount);
-                $bQuantity = $row['bookQuantity'];
+            $add_to_cart = $conn->prepare('CALL p_add_to_cart(?, ?, ?)');
+            $add_to_cart->bind_param('sii', $uname, $bID, $amount);
+            $result = $add_to_cart->execute();
 
-                if ($amount > $bQuantity) {
-                    echo "<script> 
+            if ($result) {
+                echo "<script>
                         var ID = $bID;
                         window.location.href = 'detailProduct.php?id=' + ID;
-                        alert('Sản Phẩm Không Đủ Số Lượng!');
+                        alert('NHẬP THÀNH CÔNG!!!');
                     </script>";
-                } else {
-
-                    $add_to_cart = 'p_add_to_cart';
-                    $sql_query = $conn->prepare("CALL $add_to_cart(?, ?, ?)");
-                    $sql_query->bind_param("sii", $uname, $bID, $amount);
-                    $result = $sql_query->execute();
-
-                    if ($result) {
-                        echo "<script> 
-                                var ID = $bID;
-                                window.location.href = 'detailProduct.php?id=' + ID;
-                                alert('NHẬP THÀNH CÔNG!!!');
-                            </script>";
-                        exit();
-                    } else {
-                        echo "<script> alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.'); </script>";
-                    }
-                }
-            } else {
-                echo "<script> alert('Có lỗi khi kiểm tra số lượng sản phẩm.'); </script>";
+                exit();
             }
-        } else {
-            echo "<script> alert('Dữ liệu không hợp lệ.'); </script>";
+
+            echo "<script> alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.'); </script>";
+            exit();
         }
+
+        echo "<script> alert('Có lỗi khi kiểm tra số lượng sản phẩm.'); </script>";
+        exit();
     }
+
+    echo "<script> alert('Dữ liệu không hợp lệ.'); </script>";
+    exit();
 }
