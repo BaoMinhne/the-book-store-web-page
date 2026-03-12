@@ -1,4 +1,17 @@
 <?php
+function find_first_table(mysqli $conn, array $candidates): ?string
+{
+    foreach ($candidates as $table) {
+        $escaped = $conn->real_escape_string($table);
+        $check = $conn->query("SHOW TABLES LIKE '{$escaped}'");
+        if ($check && $check->num_rows > 0) {
+            return $table;
+        }
+    }
+
+    return null;
+}
+
 function find_first_column(mysqli $conn, string $table, array $candidates): ?string
 {
     foreach ($candidates as $column) {
@@ -13,26 +26,35 @@ function find_first_column(mysqli $conn, string $table, array $candidates): ?str
     return null;
 }
 
-$bookIdCol = find_first_column($conn, 'books', ['bookID', 'BOOK_ID']);
-$bookNameCol = find_first_column($conn, 'books', ['bookName', 'BOOK_Name']);
-$bookPriceCol = find_first_column($conn, 'books', ['bookPrice', 'BOOK_PRICE']);
-$bookQuantityCol = find_first_column($conn, 'books', ['bookQuantity', 'BOOK_Amount']);
-$bookImageCol = find_first_column($conn, 'books', ['bgURL', 'bookImage', 'BOOK_Image']);
-$bookGenreCol = find_first_column($conn, 'books', ['genID', 'GEN_ID']);
-$bookPubFkCol = find_first_column($conn, 'books', ['pubID', 'PUB_ID']);
-$bookOriFkCol = find_first_column($conn, 'books', ['oriID', 'ORI_ID']);
+$booksTable = find_first_table($conn, ['books', 'BOOKS']);
+$publishersTable = find_first_table($conn, ['publishers', 'PUBLISHERS']);
+$originsTable = find_first_table($conn, ['origins', 'ORIGINS']);
 
-$pubJoinCol = find_first_column($conn, 'publishers', ['pubID', 'PUB_ID']);
-$pubBrandCol = find_first_column($conn, 'publishers', ['pubID', 'pubName', 'PUB_ID', 'PUB_Name']);
-$oriJoinCol = find_first_column($conn, 'origins', ['oriID', 'ORI_ID']);
-$oriNameCol = find_first_column($conn, 'origins', ['oriName', 'ORI_Name']);
+if (!$booksTable || !$publishersTable || !$originsTable) {
+    echo 'Cấu trúc dữ liệu chưa đúng hoặc thiếu bảng cần thiết.';
+    return;
+}
+
+$bookIdCol = find_first_column($conn, $booksTable, ['bookID', 'BOOK_ID']);
+$bookNameCol = find_first_column($conn, $booksTable, ['bookName', 'BOOK_Name']);
+$bookPriceCol = find_first_column($conn, $booksTable, ['bookPrice', 'BOOK_PRICE']);
+$bookQuantityCol = find_first_column($conn, $booksTable, ['bookQuantity', 'BOOK_Amount']);
+$bookImageCol = find_first_column($conn, $booksTable, ['bgURL', 'bookImage', 'BOOK_Image']);
+$bookGenreCol = find_first_column($conn, $booksTable, ['genID', 'GEN_ID']);
+$bookPubFkCol = find_first_column($conn, $booksTable, ['pubID', 'PUB_ID']);
+$bookOriFkCol = find_first_column($conn, $booksTable, ['oriID', 'ORI_ID']);
+
+$pubJoinCol = find_first_column($conn, $publishersTable, ['pubID', 'PUB_ID']);
+$pubBrandCol = find_first_column($conn, $publishersTable, ['pubID', 'pubName', 'PUB_ID', 'PUB_Name']);
+$oriJoinCol = find_first_column($conn, $originsTable, ['oriID', 'ORI_ID']);
+$oriNameCol = find_first_column($conn, $originsTable, ['oriName', 'ORI_Name']);
 
 if (!$bookIdCol || !$bookNameCol || !$bookPriceCol || !$bookQuantityCol || !$bookImageCol || !$bookGenreCol || !$bookPubFkCol || !$bookOriFkCol || !$pubJoinCol || !$pubBrandCol || !$oriJoinCol || !$oriNameCol) {
     echo 'Cấu trúc dữ liệu chưa đúng hoặc thiếu cột cần thiết.';
     return;
 }
 
-$baseQuery = "SELECT b.`{$bookIdCol}` AS bookID, b.`{$bookNameCol}` AS bookName, b.`{$bookPriceCol}` AS bookPrice, b.`{$bookQuantityCol}` AS bookQuantity, b.`{$bookImageCol}` AS bgURL, p.`{$pubBrandCol}` AS pubBrand, o.`{$oriNameCol}` AS oriName FROM books b JOIN publishers p ON b.`{$bookPubFkCol}` = p.`{$pubJoinCol}` JOIN origins o ON b.`{$bookOriFkCol}` = o.`{$oriJoinCol}`";
+$baseQuery = "SELECT b.`{$bookIdCol}` AS bookID, b.`{$bookNameCol}` AS bookName, b.`{$bookPriceCol}` AS bookPrice, b.`{$bookQuantityCol}` AS bookQuantity, b.`{$bookImageCol}` AS bgURL, p.`{$pubBrandCol}` AS pubBrand, o.`{$oriNameCol}` AS oriName FROM `{$booksTable}` b JOIN `{$publishersTable}` p ON b.`{$bookPubFkCol}` = p.`{$pubJoinCol}` JOIN `{$originsTable}` o ON b.`{$bookOriFkCol}` = o.`{$oriJoinCol}`";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookName'])) {
     $searchName = $conn->real_escape_string($_POST['bookName']);
@@ -126,4 +148,3 @@ if ($result && mysqli_num_rows($result) > 0) {
     echo 'Error: ' . $conn->error;
 }
 
-mysqli_close($conn);
