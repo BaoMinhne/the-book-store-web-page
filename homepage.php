@@ -12,6 +12,7 @@ if (!isset($_SESSION['username'])) {
 $debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
 $productRenderOutput = '';
 $productRenderErrors = [];
+$catalogDebug = [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -309,6 +310,7 @@ $productRenderErrors = [];
                                     restore_error_handler();
                                 }
 
+                                $catalogDebug = $GLOBALS['catalogDebug'] ?? [];
                                 echo $productRenderOutput;
                                 ?>
                             </div>
@@ -335,8 +337,13 @@ $productRenderErrors = [];
             User: <?= htmlspecialchars((string) ($_SESSION['username'] ?? ''), ENT_QUOTES, 'UTF-8'); ?><br>
             Product HTML length: <?= strlen($productRenderOutput); ?><br>
             PHP include warnings: <?= count($productRenderErrors); ?><br>
+            SQL error: <?= htmlspecialchars((string) ($catalogDebug['sql_error'] ?? 'none'), ENT_QUOTES, 'UTF-8'); ?><br>
+            Rows: <?= htmlspecialchars((string) ($catalogDebug['num_rows'] ?? 'null'), ENT_QUOTES, 'UTF-8'); ?><br>
             <?php if (!empty($productRenderErrors)): ?>
                 <pre style="white-space:pre-wrap;color:#ffb4b4;"><?= htmlspecialchars(implode("\n", $productRenderErrors), ENT_QUOTES, 'UTF-8'); ?></pre>
+            <?php endif; ?>
+            <?php if (!empty($catalogDebug)): ?>
+                <pre style="white-space:pre-wrap;color:#9f9;"><?= htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?></pre>
             <?php endif; ?>
         </div>
     <?php endif; ?>
@@ -386,6 +393,8 @@ $productRenderErrors = [];
     });
 
     console.warn('[DEBUG] Nếu bạn thấy lỗi "Unchecked runtime.lastError...", thường là từ extension trình duyệt, không phải PHP app.');
+    const phpDebug = <?= json_encode($catalogDebug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    console.log('[DEBUG][PHP catalogDebug]', phpDebug);
     <?php endif; ?>
 
     const container = document.querySelector('.app__container');

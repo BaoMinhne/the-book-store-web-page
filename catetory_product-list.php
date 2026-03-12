@@ -1,4 +1,14 @@
 <?php
+$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$catalogDebug = [
+    'tables' => [],
+    'columns' => [],
+    'query' => null,
+    'num_rows' => null,
+    'sql_error' => null,
+    'message' => null,
+];
+
 function find_first_table(mysqli $conn, array $candidates): ?string
 {
     foreach ($candidates as $table) {
@@ -30,8 +40,19 @@ $booksTable = find_first_table($conn, ['books', 'BOOKS']);
 $publishersTable = find_first_table($conn, ['publishers', 'PUBLISHERS']);
 $originsTable = find_first_table($conn, ['origins', 'ORIGINS']);
 
+$catalogDebug['tables'] = [
+    'books' => $booksTable,
+    'publishers' => $publishersTable,
+    'origins' => $originsTable,
+];
+
 if (!$booksTable || !$publishersTable || !$originsTable) {
-    echo 'Cấu trúc dữ liệu chưa đúng hoặc thiếu bảng cần thiết.';
+    $catalogDebug['message'] = 'Cấu trúc dữ liệu chưa đúng hoặc thiếu bảng cần thiết.';
+    $GLOBALS['catalogDebug'] = $catalogDebug;
+    echo $catalogDebug['message'];
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
     return;
 }
 
@@ -49,8 +70,28 @@ $pubBrandCol = find_first_column($conn, $publishersTable, ['pubID', 'pubName', '
 $oriJoinCol = find_first_column($conn, $originsTable, ['oriID', 'ORI_ID']);
 $oriNameCol = find_first_column($conn, $originsTable, ['oriName', 'ORI_Name']);
 
+$catalogDebug['columns'] = [
+    'bookIdCol' => $bookIdCol,
+    'bookNameCol' => $bookNameCol,
+    'bookPriceCol' => $bookPriceCol,
+    'bookQuantityCol' => $bookQuantityCol,
+    'bookImageCol' => $bookImageCol,
+    'bookGenreCol' => $bookGenreCol,
+    'bookPubFkCol' => $bookPubFkCol,
+    'bookOriFkCol' => $bookOriFkCol,
+    'pubJoinCol' => $pubJoinCol,
+    'pubBrandCol' => $pubBrandCol,
+    'oriJoinCol' => $oriJoinCol,
+    'oriNameCol' => $oriNameCol,
+];
+
 if (!$bookIdCol || !$bookNameCol || !$bookPriceCol || !$bookQuantityCol || !$bookImageCol || !$bookGenreCol || !$bookPubFkCol || !$bookOriFkCol || !$pubJoinCol || !$pubBrandCol || !$oriJoinCol || !$oriNameCol) {
-    echo 'Cấu trúc dữ liệu chưa đúng hoặc thiếu cột cần thiết.';
+    $catalogDebug['message'] = 'Cấu trúc dữ liệu chưa đúng hoặc thiếu cột cần thiết.';
+    $GLOBALS['catalogDebug'] = $catalogDebug;
+    echo $catalogDebug['message'];
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
     return;
 }
 
@@ -105,8 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookName'])) {
     }
 }
 
+$catalogDebug['query'] = $query;
 $result = mysqli_query($conn, $query);
 if ($result && mysqli_num_rows($result) > 0) {
+    $catalogDebug['num_rows'] = mysqli_num_rows($result);
     while ($row = mysqli_fetch_assoc($result)) {
         $bookPrice = (int) ($row['bookPrice'] ?? 0);
         $formattedPrice = number_format($bookPrice, 0, ',', '.');
@@ -144,7 +187,17 @@ if ($result && mysqli_num_rows($result) > 0) {
         echo '</div>';
     }
 } else {
+    $catalogDebug['num_rows'] = $result ? 0 : null;
+    $catalogDebug['sql_error'] = $conn->error ?: null;
+    $catalogDebug['message'] = 'Không có dữ liệu.';
     echo 'Không có dữ liệu.';
-    echo 'Error: ' . $conn->error;
+    if ($conn->error) {
+        echo ' Error: ' . htmlspecialchars($conn->error, ENT_QUOTES, 'UTF-8');
+    }
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
 }
+
+$GLOBALS['catalogDebug'] = $catalogDebug;
 
