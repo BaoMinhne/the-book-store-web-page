@@ -189,10 +189,38 @@ if ($result && mysqli_num_rows($result) > 0) {
 } else {
     $catalogDebug['num_rows'] = $result ? 0 : null;
     $catalogDebug['sql_error'] = $conn->error ?: null;
-    $catalogDebug['message'] = 'Không có dữ liệu.';
-    echo 'Không có dữ liệu.';
+    $catalogDebug['message'] = 'Không có dữ liệu sản phẩm phù hợp.';
+
+    $selectedCategory = $_GET['category'] ?? 'all';
+    $categoryLabelMap = [
+        'all' => 'Tất cả sản phẩm',
+        'sach_giao_khoa' => 'Sách giáo khoa',
+        'tieu_thuyet' => 'Tiểu thuyết',
+        'truyen_tranh' => 'Truyện tranh',
+        'kinh_doanh' => 'Kinh doanh',
+        'khoa_hoc' => 'Khoa học',
+        'giao_trinh' => 'Giáo trình',
+        'y_hoc' => 'Y học',
+        'tham_khao' => 'Sách tham khảo',
+        'cong_nghe' => 'Công nghệ',
+        'lich_su' => 'Lịch sử',
+        'small_to_large' => 'Giá tăng dần',
+        'large_to_small' => 'Giá giảm dần',
+    ];
+    $selectedCategoryLabel = $categoryLabelMap[$selectedCategory] ?? 'Bộ lọc hiện tại';
+
+    echo '<div class="home-empty-state">';
+    echo '  <div class="home-empty-state__icon"><i class="fa-solid fa-box-open"></i></div>';
+    echo '  <h3 class="home-empty-state__title">Chưa có sản phẩm để hiển thị</h3>';
+    echo '  <p class="home-empty-state__desc">Danh mục <strong>' . htmlspecialchars($selectedCategoryLabel, ENT_QUOTES, 'UTF-8') . '</strong> hiện chưa có dữ liệu hoặc chưa phù hợp với từ khóa tìm kiếm.</p>';
+    echo '  <div class="home-empty-state__actions">';
+    echo '      <a href="homepage.php?category=all" class="home-empty-state__btn home-empty-state__btn--primary">Xem tất cả sản phẩm</a>';
+    echo '      <a href="homepage.php" class="home-empty-state__btn">Đặt lại bộ lọc</a>';
+    echo '  </div>';
+    echo '</div>';
+
     if ($conn->error) {
-        echo ' Error: ' . htmlspecialchars($conn->error, ENT_QUOTES, 'UTF-8');
+        echo '<p class="home-empty-state__error">SQL Error: ' . htmlspecialchars($conn->error, ENT_QUOTES, 'UTF-8') . '</p>';
     }
     if ($debugMode) {
         echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
@@ -200,4 +228,3 @@ if ($result && mysqli_num_rows($result) > 0) {
 }
 
 $GLOBALS['catalogDebug'] = $catalogDebug;
-
