@@ -16,7 +16,17 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
         exit();
     }
 
-    $sql_query = $conn->prepare('SELECT userName, userRole, userPass FROM userInfos WHERE userName = ? LIMIT 1');
+    $useLegacyTable = false;
+    $tableCheck = $conn->query("SHOW TABLES LIKE 'userinfos'");
+    if ($tableCheck && $tableCheck->num_rows > 0) {
+        $useLegacyTable = true;
+    }
+
+    if ($useLegacyTable) {
+        $sql_query = $conn->prepare('SELECT userName, userRole, userPass FROM userInfos WHERE userName = ? LIMIT 1');
+    } else {
+        $sql_query = $conn->prepare('SELECT u.USER_Name AS userName, ur.UR_ROLE AS userRole, u.USER_Password AS userPass FROM USERS u JOIN USER_ROLE ur ON ur.USER_ID = u.USER_ID WHERE u.USER_Name = ? LIMIT 1');
+    }
 
     if (!$sql_query) {
         echo "<script>

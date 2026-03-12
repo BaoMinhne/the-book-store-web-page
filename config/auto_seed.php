@@ -20,6 +20,16 @@ function seed_has_procedure(mysqli $conn, string $procedureName): bool
     return (int) ($result['total'] ?? 0) > 0;
 }
 
+function seed_has_column(mysqli $conn, string $tableName, string $columnName): bool
+{
+    $stmt = $conn->prepare('SELECT COUNT(*) AS total FROM information_schema.columns WHERE table_schema = DATABASE() AND LOWER(table_name) = LOWER(?) AND LOWER(column_name) = LOWER(?)');
+    $stmt->bind_param('ss', $tableName, $columnName);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    return (int) ($result['total'] ?? 0) > 0;
+}
+
 function seed_exec_sql_file(mysqli $conn, string $relativePath): void
 {
     $fullPath = dirname(__DIR__) . '/' . ltrim($relativePath, '/');
@@ -150,8 +160,17 @@ function seed_new_schema(mysqli $conn): void
     seed_exec_sql_file($conn, 'database/seeds/01_schema.sql');
     seed_exec_sql_file($conn, 'database/seeds/02_seed_data.sql');
 
+    if (seed_has_table($conn, 'USERS') && !seed_has_column($conn, 'USERS', 'USER_Password')) {
+        $conn->query("ALTER TABLE USERS ADD COLUMN USER_Password VARCHAR(255) NOT NULL DEFAULT '' AFTER USER_Name");
+    }
+
+    if (seed_has_column($conn, 'USERS', 'USER_Password')) {
+        $conn->query("UPDATE USERS SET USER_Password = 'admin123' WHERE USER_Name = 'admin' AND (USER_Password IS NULL OR USER_Password = '')");
+        $conn->query("UPDATE USERS SET USER_Password = '123456' WHERE USER_Name = 'customer01' AND (USER_Password IS NULL OR USER_Password = '')");
+    }
+
     if (!seed_has_procedure($conn, 'p_register')) {
-        $conn->query("CREATE PROCEDURE p_register(IN p_userName VARCHAR(255), IN p_userPass VARCHAR(255))\nBEGIN\n    INSERT INTO USERS (USER_Name) VALUES (p_userName);\n    INSERT INTO USER_ROLE (USER_ID, UR_ROLE) VALUES (LAST_INSERT_ID(), 0);\nEND");
+        $conn->query("CREATE PROCEDURE p_register(IN p_userName VARCHAR(255), IN p_userPass VARCHAR(255))\nBEGIN\n    INSERT INTO USERS (USER_Name, USER_Password) VALUES (p_userName, p_userPass);\n    INSERT INTO USER_ROLE (USER_ID, UR_ROLE) VALUES (LAST_INSERT_ID(), 0);\nEND");
     }
 
     if (!seed_has_procedure($conn, 'p_view_gen_books')) {

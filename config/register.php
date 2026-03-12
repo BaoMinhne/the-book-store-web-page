@@ -16,23 +16,36 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') 
         exit();
     }
 
-    $nameCheck = $conn->prepare('SELECT userName FROM userinfos WHERE userName = ? LIMIT 1');
-    $nameCheck->bind_param('s', $username);
-    $nameCheck->execute();
-    $checkRe = $nameCheck->get_result();
-
-    if ($checkRe && $checkRe->num_rows > 0) {
-        echo "
-            <script>
-            alert('Tài Khoản Đã Tồn Tại! Vui Lòng Thử Lại!!');
+    if ($password !== $passcfm) {
+        echo "<script>
+            alert('Mật Khẩu Không Hợp Lệ!');
             window.location.href = '../index.php';
             </script>";
         exit();
     }
 
-    if ($password !== $passcfm) {
-        echo "<script>
-            alert('Mật Khẩu Không Hợp Lệ!');
+    $useLegacyTable = false;
+    $tableCheck = $conn->query("SHOW TABLES LIKE 'userinfos'");
+    if ($tableCheck && $tableCheck->num_rows > 0) {
+        $useLegacyTable = true;
+    }
+
+    if ($useLegacyTable) {
+        $nameCheck = $conn->prepare('SELECT userName FROM userinfos WHERE userName = ? LIMIT 1');
+        $nameCheck->bind_param('s', $username);
+        $nameCheck->execute();
+        $checkRe = $nameCheck->get_result();
+    } else {
+        $nameCheck = $conn->prepare('SELECT USER_Name FROM USERS WHERE USER_Name = ? LIMIT 1');
+        $nameCheck->bind_param('s', $username);
+        $nameCheck->execute();
+        $checkRe = $nameCheck->get_result();
+    }
+
+    if ($checkRe && $checkRe->num_rows > 0) {
+        echo "
+            <script>
+            alert('Tài Khoản Đã Tồn Tại! Vui Lòng Thử Lại!!');
             window.location.href = '../index.php';
             </script>";
         exit();
