@@ -53,7 +53,6 @@ if (!$booksTable || !$publishersTable || !$originsTable) {
     if ($debugMode) {
         echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
     }
-
     return;
 }
 
@@ -93,7 +92,6 @@ if (!$bookIdCol || !$bookNameCol || !$bookPriceCol || !$bookQuantityCol || !$boo
     if ($debugMode) {
         echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
     }
-
     return;
 }
 
@@ -103,85 +101,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookName'])) {
     $searchName = $conn->real_escape_string($_POST['bookName']);
     $query = $baseQuery . " WHERE b.`{$bookNameCol}` LIKE '%{$searchName}%'";
 } else {
-    $category = $_GET['category'] ?? 'all';
-    $sort = $_GET['sort'] ?? 'default';
-    $stock = $_GET['stock'] ?? 'all';
-    $priceRange = $_GET['price_range'] ?? 'all';
-
-    if ($category === 'small_to_large' || $category === 'large_to_small') {
-        $sort = $category === 'small_to_large' ? 'price_asc' : 'price_desc';
-        $category = 'all';
-    }
-
-    $genreMap = [
-        'sach_giao_khoa' => 'SGK',
-        'tieu_thuyet' => 'TT',
-        'truyen_tranh' => 'TRT',
-        'kinh_doanh' => 'KD',
-        'khoa_hoc' => 'KH',
-        'giao_trinh' => 'GT',
-        'y_hoc' => 'YH',
-        'tham_khao' => 'STK',
-        'cong_nghe' => 'CN',
-        'lich_su' => 'LS',
-    ];
-
-    $whereClauses = [];
-    if (isset($genreMap[$category])) {
-        $whereClauses[] = "b.`{$bookGenreCol}` = '{$genreMap[$category]}'";
-    }
-
-    switch ($stock) {
-        case 'in_stock':
-            $whereClauses[] = "b.`{$bookQuantityCol}` > 0";
+    $category = $_GET['category'] ?? null;
+    switch ($category) {
+        case 'sach_giao_khoa':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'SGK' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-        case 'low_stock':
-            $whereClauses[] = "b.`{$bookQuantityCol}` BETWEEN 1 AND 10";
+        case 'tieu_thuyet':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TT' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-        case 'out_of_stock':
-            $whereClauses[] = "b.`{$bookQuantityCol}` = 0";
+        case 'truyen_tranh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TRT' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-    }
-
-    switch ($priceRange) {
-        case 'under_100k':
-            $whereClauses[] = "b.`{$bookPriceCol}` < 100000";
+        case 'kinh_doanh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KD' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-        case '100k_300k':
-            $whereClauses[] = "b.`{$bookPriceCol}` BETWEEN 100000 AND 300000";
+        case 'khoa_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KH' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-        case '300k_500k':
-            $whereClauses[] = "b.`{$bookPriceCol}` BETWEEN 300001 AND 500000";
+        case 'giao_trinh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'GT' ORDER BY b.`{$bookIdCol}` ASC";
             break;
-        case 'over_500k':
-            $whereClauses[] = "b.`{$bookPriceCol}` > 500000";
+        case 'y_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'YH' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'tham_khao':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'STK' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'cong_nghe':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'CN' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'lich_su':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'LS' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'small_to_large':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` ASC";
+            break;
+        case 'large_to_small':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` DESC";
+            break;
+        case 'all':
+        default:
+            $query = $baseQuery . " ORDER BY b.`{$bookIdCol}` ASC";
             break;
     }
-
-    $orderBy = "b.`{$bookIdCol}` ASC";
-    switch ($sort) {
-        case 'price_asc':
-            $orderBy = "b.`{$bookPriceCol}` ASC";
-            break;
-        case 'price_desc':
-            $orderBy = "b.`{$bookPriceCol}` DESC";
-            break;
-        case 'name_asc':
-            $orderBy = "b.`{$bookNameCol}` ASC";
-            break;
-        case 'name_desc':
-            $orderBy = "b.`{$bookNameCol}` DESC";
-            break;
-        case 'newest':
-            $orderBy = "b.`{$bookIdCol}` DESC";
-            break;
-    }
-
-    $query = $baseQuery;
-    if (!empty($whereClauses)) {
-        $query .= " WHERE " . implode(' AND ', $whereClauses);
-    }
-    $query .= " ORDER BY {$orderBy}";
 }
 
 $catalogDebug['query'] = $query;
@@ -230,15 +192,6 @@ if ($result && mysqli_num_rows($result) > 0) {
     $catalogDebug['message'] = 'Không có dữ liệu sản phẩm phù hợp.';
 
     $selectedCategory = $_GET['category'] ?? 'all';
-    $selectedSort = $_GET['sort'] ?? 'default';
-    $selectedStock = $_GET['stock'] ?? 'all';
-    $selectedPriceRange = $_GET['price_range'] ?? 'all';
-
-    if ($selectedCategory === 'small_to_large' || $selectedCategory === 'large_to_small') {
-        $selectedSort = $selectedCategory === 'small_to_large' ? 'price_asc' : 'price_desc';
-        $selectedCategory = 'all';
-    }
-
     $categoryLabelMap = [
         'all' => 'Tất cả sản phẩm',
         'sach_giao_khoa' => 'Sách giáo khoa',
@@ -251,53 +204,18 @@ if ($result && mysqli_num_rows($result) > 0) {
         'tham_khao' => 'Sách tham khảo',
         'cong_nghe' => 'Công nghệ',
         'lich_su' => 'Lịch sử',
+        'small_to_large' => 'Giá tăng dần',
+        'large_to_small' => 'Giá giảm dần',
     ];
-    $sortLabelMap = [
-        'default' => 'Mặc định',
-        'price_asc' => 'Giá tăng dần',
-        'price_desc' => 'Giá giảm dần',
-        'name_asc' => 'Tên A-Z',
-        'name_desc' => 'Tên Z-A',
-        'newest' => 'Mới nhất',
-    ];
-    $stockLabelMap = [
-        'all' => 'Tồn kho bất kỳ',
-        'in_stock' => 'Còn hàng',
-        'low_stock' => 'Sắp hết hàng',
-        'out_of_stock' => 'Hết hàng',
-    ];
-    $priceLabelMap = [
-        'all' => 'Mọi mức giá',
-        'under_100k' => 'Dưới 100.000đ',
-        '100k_300k' => '100.000đ - 300.000đ',
-        '300k_500k' => '300.000đ - 500.000đ',
-        'over_500k' => 'Trên 500.000đ',
-    ];
-
-    $activeFilterLabels = [];
-    if ($selectedCategory !== 'all') {
-        $activeFilterLabels[] = $categoryLabelMap[$selectedCategory] ?? 'Danh mục';
-    }
-    if ($selectedSort !== 'default') {
-        $activeFilterLabels[] = $sortLabelMap[$selectedSort] ?? 'Sắp xếp';
-    }
-    if ($selectedStock !== 'all') {
-        $activeFilterLabels[] = $stockLabelMap[$selectedStock] ?? 'Tồn kho';
-    }
-    if ($selectedPriceRange !== 'all') {
-        $activeFilterLabels[] = $priceLabelMap[$selectedPriceRange] ?? 'Mức giá';
-    }
-
-    $selectedFilterSummary = !empty($activeFilterLabels) ? implode(' · ', $activeFilterLabels) : 'Tất cả sản phẩm';
-    $currentPage = basename($_SERVER['PHP_SELF']);
+    $selectedCategoryLabel = $categoryLabelMap[$selectedCategory] ?? 'Bộ lọc hiện tại';
 
     echo '<div class="home-empty-state">';
     echo '  <div class="home-empty-state__icon"><i class="fa-solid fa-box-open"></i></div>';
     echo '  <h3 class="home-empty-state__title">Chưa có sản phẩm để hiển thị</h3>';
-    echo '  <p class="home-empty-state__desc">Bộ lọc <strong>' . htmlspecialchars($selectedFilterSummary, ENT_QUOTES, 'UTF-8') . '</strong> hiện chưa có dữ liệu hoặc chưa phù hợp với từ khóa tìm kiếm.</p>';
+    echo '  <p class="home-empty-state__desc">Danh mục <strong>' . htmlspecialchars($selectedCategoryLabel, ENT_QUOTES, 'UTF-8') . '</strong> hiện chưa có dữ liệu hoặc chưa phù hợp với từ khóa tìm kiếm.</p>';
     echo '  <div class="home-empty-state__actions">';
-    echo '      <a href="' . htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8') . '?category=all" class="home-empty-state__btn home-empty-state__btn--primary">Xem tất cả sản phẩm</a>';
-    echo '      <a href="' . htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8') . '" class="home-empty-state__btn">Đặt lại bộ lọc</a>';
+    echo '      <a href="homepage.php?category=all" class="home-empty-state__btn home-empty-state__btn--primary">Xem tất cả sản phẩm</a>';
+    echo '      <a href="homepage.php" class="home-empty-state__btn">Đặt lại bộ lọc</a>';
     echo '  </div>';
     echo '</div>';
 
