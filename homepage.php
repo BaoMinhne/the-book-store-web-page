@@ -199,97 +199,121 @@ $catalogDebug = [];
                                 Danh mục
                             </h3>
 
-                            <?php $currentCategory = $_GET['category'] ?? 'all'; ?>
-
+                            <?php
+                            $currentCategory = $_GET['category'] ?? 'all';
+                            $currentSort = $_GET['sort'] ?? 'default';
+                            $currentStock = $_GET['stock'] ?? 'all';
+                            $currentPriceRange = $_GET['price_range'] ?? 'all';
+                            $filterQueryBase = [
+                                'sort' => $currentSort,
+                                'stock' => $currentStock,
+                                'price_range' => $currentPriceRange,
+                            ];
+                            ?>
                             <ul class="category-list">
-                                <li class="category-item">
-                                    <a href="homepage.php?category=all" class="category-item__link <?= $currentCategory === 'all' ? 'category-item__link--active' : ''; ?>">Sản phẩm</a>
-                                </li>
+                                <?php
+                                $categoryItems = [
+                                    'all' => 'Sản phẩm',
+                                    'sach_giao_khoa' => 'Sách giáo khoa',
+                                    'tieu_thuyet' => 'Tiểu thuyết',
+                                    'truyen_tranh' => 'Truyện tranh',
+                                    'kinh_doanh' => 'Kinh doanh',
+                                    'khoa_hoc' => 'Khoa học',
+                                    'giao_trinh' => 'Giáo trình',
+                                    'y_hoc' => 'Y học',
+                                    'tham_khao' => 'Sách tham khảo',
+                                    'cong_nghe' => 'Công nghệ',
+                                    'lich_su' => 'Lịch sử',
+                                ];
 
-                                <li class="category-item">
-                                    <a href="homepage.php?category=sach_giao_khoa" class="category-item__link <?= $currentCategory === 'sach_giao_khoa' ? 'category-item__link--active' : ''; ?>">Sách giáo khoa</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=tieu_thuyet" class="category-item__link <?= $currentCategory === 'tieu_thuyet' ? 'category-item__link--active' : ''; ?>">Tiểu thuyết</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=truyen_tranh" class="category-item__link <?= $currentCategory === 'truyen_tranh' ? 'category-item__link--active' : ''; ?>">Truyện tranh</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=kinh_doanh" class="category-item__link <?= $currentCategory === 'kinh_doanh' ? 'category-item__link--active' : ''; ?>">Kinh doanh</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=khoa_hoc" class="category-item__link <?= $currentCategory === 'khoa_hoc' ? 'category-item__link--active' : ''; ?>">Khoa học</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=giao_trinh" class="category-item__link <?= $currentCategory === 'giao_trinh' ? 'category-item__link--active' : ''; ?>">Giáo trình</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=y_hoc" class="category-item__link <?= $currentCategory === 'y_hoc' ? 'category-item__link--active' : ''; ?>">Y học</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=tham_khao" class="category-item__link <?= $currentCategory === 'tham_khao' ? 'category-item__link--active' : ''; ?>">Sách tham khảo</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=cong_nghe" class="category-item__link <?= $currentCategory === 'cong_nghe' ? 'category-item__link--active' : ''; ?>">Công nghệ</a>
-                                </li>
-
-                                <li class="category-item">
-                                    <a href="homepage.php?category=lich_su" class="category-item__link <?= $currentCategory === 'lich_su' ? 'category-item__link--active' : ''; ?>">Lịch sử</a>
-                                </li>
+                                foreach ($categoryItems as $categoryKey => $categoryLabel):
+                                    $categoryLink = 'homepage.php?' . http_build_query(array_merge($filterQueryBase, ['category' => $categoryKey]));
+                                ?>
+                                    <li class="category-item">
+                                        <a href="<?= htmlspecialchars($categoryLink, ENT_QUOTES, 'UTF-8'); ?>" class="category-item__link <?= $currentCategory === $categoryKey ? 'category-item__link--active' : ''; ?>">
+                                            <?= htmlspecialchars($categoryLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                        </a>
+                                    </li>
+                                <?php endforeach; ?>
                             </ul>
                         </nav>
                     </div>
 
                     <div class="grid__column-10 ">
                         <div class="home-filter">
-                            <span class="home-filter__label">Sắp xếp theo</span>
-                            <!-- <button class="home-filter__btn btn">Phổ biến</button>
-                            <button class="home-filter__btn btn btn--primary">Mới nhất</button>
-                            <button class="home-filter__btn btn">Bán chạy</button> -->
-
-                            <div class="select-input">
-                                <span class="select-input__label">Giá</span>
-                                <i class="select-input__icon fa-solid fa-angle-down"></i>
-                                <!-- list options -->
-                                <ul class="select-input__list">
-                                    <li class="select-input__item">
-                                        <span class="select-input__link">
-                                            <a href="homepage.php?category=large_to_small">Giá: Cao đến Thấp</a>
-                                        </span>
-                                    </li>
-
-                                    <li class="select-input__item">
-                                        <span class="select-input__link">
-                                            <a href="homepage.php?category=small_to_large">Giá: Thấp đến cao</a>
-                                        </span>
-                                    </li>
-                                </ul>
+                            <div class="home-filter__top">
+                                <span class="home-filter__title">Bộ lọc sản phẩm</span>
+                                <a class="home-filter__reset" href="homepage.php?category=<?= urlencode($currentCategory); ?>">Đặt lại filter</a>
                             </div>
 
-                            <!-- Thanh điều hướng -->
-                            <!-- <div class="home-filter__page">
-                                <span class="home-filter__page-num">
-                                    <span class="home-filter__page-current">1</span>/14
-                                </span>
+                            <form class="home-filter__form" method="GET" action="homepage.php">
+                                <input type="hidden" name="category" value="<?= htmlspecialchars($currentCategory, ENT_QUOTES, 'UTF-8'); ?>">
 
-                                <div class="home-filter__page-control">
-                                    <a href="" class="home-filter__page-btn home-filter__page-btn--disabled">
-                                        <i class="home-filter__page-icon fa-solid fa-angle-left"></i>
-                                    </a>
-                                    <a href="" class="home-filter__page-btn">
-                                        <i class="home-filter__page-icon fa-solid fa-angle-right"></i>
-                                    </a>
+                                <div class="home-filter__group">
+                                    <label class="home-filter__group-label" for="sort-select">Sắp xếp</label>
+                                    <select id="sort-select" class="home-filter__select" name="sort">
+                                        <option value="default" <?= $currentSort === 'default' ? 'selected' : ''; ?>>Mặc định</option>
+                                        <option value="newest" <?= $currentSort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                                        <option value="price_asc" <?= $currentSort === 'price_asc' ? 'selected' : ''; ?>>Giá tăng dần</option>
+                                        <option value="price_desc" <?= $currentSort === 'price_desc' ? 'selected' : ''; ?>>Giá giảm dần</option>
+                                        <option value="name_asc" <?= $currentSort === 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
+                                        <option value="name_desc" <?= $currentSort === 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
+                                    </select>
                                 </div>
-                            </div> -->
+
+                                <div class="home-filter__group">
+                                    <label class="home-filter__group-label" for="stock-select">Tình trạng</label>
+                                    <select id="stock-select" class="home-filter__select" name="stock">
+                                        <option value="all" <?= $currentStock === 'all' ? 'selected' : ''; ?>>Tất cả</option>
+                                        <option value="in_stock" <?= $currentStock === 'in_stock' ? 'selected' : ''; ?>>Còn hàng</option>
+                                        <option value="low_stock" <?= $currentStock === 'low_stock' ? 'selected' : ''; ?>>Sắp hết hàng (≤10)</option>
+                                        <option value="out_of_stock" <?= $currentStock === 'out_of_stock' ? 'selected' : ''; ?>>Hết hàng</option>
+                                    </select>
+                                </div>
+
+                                <div class="home-filter__group">
+                                    <label class="home-filter__group-label" for="price-range-select">Khoảng giá</label>
+                                    <select id="price-range-select" class="home-filter__select" name="price_range">
+                                        <option value="all" <?= $currentPriceRange === 'all' ? 'selected' : ''; ?>>Tất cả mức giá</option>
+                                        <option value="under_100k" <?= $currentPriceRange === 'under_100k' ? 'selected' : ''; ?>>Dưới 100.000đ</option>
+                                        <option value="100k_300k" <?= $currentPriceRange === '100k_300k' ? 'selected' : ''; ?>>100.000đ - 300.000đ</option>
+                                        <option value="300k_500k" <?= $currentPriceRange === '300k_500k' ? 'selected' : ''; ?>>300.000đ - 500.000đ</option>
+                                        <option value="over_500k" <?= $currentPriceRange === 'over_500k' ? 'selected' : ''; ?>>Trên 500.000đ</option>
+                                    </select>
+                                </div>
+
+                                <button class="home-filter__submit" type="submit">Áp dụng</button>
+                            </form>
+
+                            <div class="home-filter__chips">
+                                <?php
+                                $quickFilters = [
+                                    'con_hang' => ['label' => 'Còn hàng', 'params' => ['stock' => 'in_stock']],
+                                    'gia_tot' => ['label' => 'Dưới 100k', 'params' => ['price_range' => 'under_100k']],
+                                    'moi_nhat' => ['label' => 'Mới nhất', 'params' => ['sort' => 'newest']],
+                                ];
+
+                                foreach ($quickFilters as $quickKey => $quickConfig):
+                                    $chipParams = array_merge([
+                                        'category' => $currentCategory,
+                                        'sort' => $currentSort,
+                                        'stock' => $currentStock,
+                                        'price_range' => $currentPriceRange,
+                                    ], $quickConfig['params']);
+                                    $chipHref = 'homepage.php?' . http_build_query($chipParams);
+                                    $isChipActive = true;
+                                    foreach ($quickConfig['params'] as $paramKey => $paramValue) {
+                                        if (($_GET[$paramKey] ?? null) !== $paramValue) {
+                                            $isChipActive = false;
+                                            break;
+                                        }
+                                    }
+                                ?>
+                                    <a href="<?= htmlspecialchars($chipHref, ENT_QUOTES, 'UTF-8'); ?>" class="home-filter__chip <?= $isChipActive ? 'home-filter__chip--active' : ''; ?>">
+                                        <?= htmlspecialchars($quickConfig['label'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
 
                         <div class="home-product">
