@@ -46,7 +46,7 @@ if (!isset($_SESSION['username'])) {
         <link rel="stylesheet" href="<?= asset_url('assets/css/admin.css'); ?>">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="<?= asset_url('assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css'); ?>">
-        <link rel="icon" href="../assets/img/logo/4482549.jpg">
+        <link rel="icon" href="<?= asset_url('assets/img/logo/4482549.jpg'); ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>BookLand</title>
     </head>
@@ -61,13 +61,13 @@ if (!isset($_SESSION['username'])) {
                                 Vào cửa hàng trên ứng dụng
                                 <!-- QR code -->
                                 <div class="header__qr">
-                                    <img src="../assets/img/QR_code.png" alt="QR code" class="header__qr-img">
+                                    <img src="<?= asset_url('assets/img/QR_code.png'); ?>" alt="QR code" class="header__qr-img">
                                     <div class="header__qr-apps">
                                         <a href="" class="header__qr-link">
-                                            <img src="../assets/img/CH_play.png" alt="CH play" class="header__qr-download-img">
+                                            <img src="<?= asset_url('assets/img/CH_play.png'); ?>" alt="CH play" class="header__qr-download-img">
                                         </a>
                                         <a href="" class="header__qr-link">
-                                            <img src="../assets/img/App_store.png" alt="App store" class="header__qr-download-img">
+                                            <img src="<?= asset_url('assets/img/App_store.png'); ?>" alt="App store" class="header__qr-download-img">
                                         </a>
                                     </div>
                                 </div>
@@ -98,7 +98,7 @@ if (!isset($_SESSION['username'])) {
                         <!-- After Login -->
                         <div id="after-login__section" style="display: flex;">
                             <li class="header__navbar-item header__navbar-user">
-                                <img src="../assets/img/admin.png" alt="" class="header__navbar-user-img">
+                                <img src="<?= asset_url('assets/img/admin.png'); ?>" alt="" class="header__navbar-user-img">
 
                                 <span class="header__navbar-user-name"></span>
 
@@ -117,7 +117,7 @@ if (!isset($_SESSION['username'])) {
                         <div class="header__logo">
                             <!-- chưa hoàn thiện -->
                             <a href="#" class="header__logo-link">
-                                <img src="../assets/img/logo/logotest1.png" alt="" class="header__logo-img">
+                                <img src="<?= asset_url('assets/img/logo/logotest1.png'); ?>" alt="" class="header__logo-img">
                             </a>
                         </div>
 

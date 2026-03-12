@@ -1,90 +1,92 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['bookName'])) {
-    $searchName = $_POST['bookName'];
-    $query = "SELECT * FROM Books 
-    JOIN publishers ON Books.pubID = publishers.pubID 
-    JOIN origins ON books.oriID = origins.oriID
-    WHERE Books.bookName LIKE '%$searchName%'";
-} else {
-    if (isset($_GET['category'])) {
-        // Lấy giá trị của tham số danh mục từ URL
-        $category = $_GET['category'];
-        switch ($category) {
-            case 'sach_giao_khoa':
-                // Truy vấn sách giáo khoa
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'SGK' ORDER BY bookID ASC";
-                break;
-
-            case 'tieu_thuyet':
-                // Truy vấn tiểu thuyết
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'TT' ORDER BY bookID ASC";
-                break;
-
-            case 'truyen_tranh':
-                // Truy vấn truyện tranh
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'TRT' ORDER BY bookID ASC";
-                break;
-
-            case 'kinh_doanh':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'KD' ORDER BY bookID ASC";
-                break;
-
-            case 'khoa_hoc':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'KH' ORDER BY bookID ASC";
-                break;
-
-            case 'giao_trinh':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'GT' ORDER BY bookID ASC";
-                break;
-
-            case 'y_hoc':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'YH' ORDER BY bookID ASC";
-                break;
-
-            case 'tham_khao':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'STK' ORDER BY bookID ASC";
-                break;
-
-            case 'cong_nghe':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'CN' ORDER BY bookID ASC";
-                break;
-
-            case 'lich_su':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'LS' ORDER BY bookID ASC";
-                break;
-
-            case 'all':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookID ASC";
-                break;
-
-            case 'small_to_large':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookPrice ASC";
-                break;
-
-            case 'large_to_small':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookPrice DESC";
-                break;
-
-            default:
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookID ASC";
-                break;
+function find_first_column(mysqli $conn, string $table, array $candidates): ?string
+{
+    foreach ($candidates as $column) {
+        $escapedTable = str_replace('`', '``', $table);
+        $escapedColumn = $conn->real_escape_string($column);
+        $check = $conn->query("SHOW COLUMNS FROM `{$escapedTable}` LIKE '{$escapedColumn}'");
+        if ($check && $check->num_rows > 0) {
+            return $column;
         }
-    } else {
-        $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID";
     }
-    // Truy vấn cơ sở dữ liệu để lấy dữ liệu từ bảng Books
+
+    return null;
+}
+
+$bookIdCol = find_first_column($conn, 'books', ['bookID', 'BOOK_ID']);
+$bookNameCol = find_first_column($conn, 'books', ['bookName', 'BOOK_Name']);
+$bookPriceCol = find_first_column($conn, 'books', ['bookPrice', 'BOOK_PRICE']);
+$bookQuantityCol = find_first_column($conn, 'books', ['bookQuantity', 'BOOK_Amount']);
+$bookImageCol = find_first_column($conn, 'books', ['bgURL', 'bookImage', 'BOOK_Image']);
+$bookGenreCol = find_first_column($conn, 'books', ['genID', 'GEN_ID']);
+$bookPubFkCol = find_first_column($conn, 'books', ['pubID', 'PUB_ID']);
+$bookOriFkCol = find_first_column($conn, 'books', ['oriID', 'ORI_ID']);
+
+$pubJoinCol = find_first_column($conn, 'publishers', ['pubID', 'PUB_ID']);
+$pubBrandCol = find_first_column($conn, 'publishers', ['pubID', 'pubName', 'PUB_ID', 'PUB_Name']);
+$oriJoinCol = find_first_column($conn, 'origins', ['oriID', 'ORI_ID']);
+$oriNameCol = find_first_column($conn, 'origins', ['oriName', 'ORI_Name']);
+
+if (!$bookIdCol || !$bookNameCol || !$bookPriceCol || !$bookQuantityCol || !$bookImageCol || !$bookGenreCol || !$bookPubFkCol || !$bookOriFkCol || !$pubJoinCol || !$pubBrandCol || !$oriJoinCol || !$oriNameCol) {
+    echo 'Cấu trúc dữ liệu chưa đúng hoặc thiếu cột cần thiết.';
+    return;
+}
+
+$baseQuery = "SELECT b.`{$bookIdCol}` AS bookID, b.`{$bookNameCol}` AS bookName, b.`{$bookPriceCol}` AS bookPrice, b.`{$bookQuantityCol}` AS bookQuantity, b.`{$bookImageCol}` AS bgURL, p.`{$pubBrandCol}` AS pubBrand, o.`{$oriNameCol}` AS oriName FROM books b JOIN publishers p ON b.`{$bookPubFkCol}` = p.`{$pubJoinCol}` JOIN origins o ON b.`{$bookOriFkCol}` = o.`{$oriJoinCol}`";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookName'])) {
+    $searchName = $conn->real_escape_string($_POST['bookName']);
+    $query = $baseQuery . " WHERE b.`{$bookNameCol}` LIKE '%{$searchName}%'";
+} else {
+    $category = $_GET['category'] ?? null;
+    switch ($category) {
+        case 'sach_giao_khoa':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'SGK' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'tieu_thuyet':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'truyen_tranh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TRT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'kinh_doanh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KD' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'khoa_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KH' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'giao_trinh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'GT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'y_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'YH' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'tham_khao':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'STK' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'cong_nghe':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'CN' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'lich_su':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'LS' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'small_to_large':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` ASC";
+            break;
+        case 'large_to_small':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` DESC";
+            break;
+        case 'all':
+        default:
+            $query = $baseQuery . " ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+    }
 }
 
 $result = mysqli_query($conn, $query);
-// Kiểm tra xem có dữ liệu được trả về không
-if (mysqli_num_rows($result) > 0) {
-    // Duyệt qua từng hàng dữ liệu và tạo thẻ div tương ứng
+if ($result && mysqli_num_rows($result) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
-        $bookPrice = $row['bookPrice'];
+        $bookPrice = (int) ($row['bookPrice'] ?? 0);
         $formattedPrice = number_format($bookPrice, 0, ',', '.');
         echo '<div class="grid__column-2-4">';
         echo '<a class="home-product-item" href="detailProduct.php?id=' . $row['bookID'] . '">';
@@ -107,7 +109,7 @@ if (mysqli_num_rows($result) > 0) {
         echo '<span class="home-product-item__sold">' . $row['bookQuantity'] . ' Còn Lại  </span>';
         echo '</div>';
         echo '<div class="home-product-item__origin">';
-        echo '<span class="home-product-item__brand">' . $row['pubID'] . '</span>';
+        echo '<span class="home-product-item__brand">' . $row['pubBrand'] . '</span>';
         echo '<span class="home-product-item__origin">' . $row['oriName'] . '</span>';
         echo '</div>';
         echo '<div class="home-product-item__favourite">';
@@ -118,12 +120,8 @@ if (mysqli_num_rows($result) > 0) {
         echo '</div>';
     }
 } else {
-    // Hiển thị thông báo nếu không có dữ liệu
     echo 'Không có dữ liệu.';
-    echo "Error: " . $sql_query->error; // Hiển thị lỗi SQL nếu có
-    echo "Error: " . $conn->error; // Hiển thị lỗi kết nối nếu có
+    echo 'Error: ' . $conn->error;
 }
 
-
-// Đóng kết nối cơ sở dữ liệu
 mysqli_close($conn);

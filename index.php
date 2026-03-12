@@ -15,7 +15,7 @@ include './config/url_helper.php';
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset_url('assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="../Shop_project/assets/img/logo/4482549.jpg">
+    <link rel="icon" href="<?= asset_url('assets/img/logo/4482549.jpg'); ?>">
     <title>BookLand</title>
 </head>
 
@@ -29,13 +29,13 @@ include './config/url_helper.php';
                             Vào cửa hàng trên ứng dụng
                             <!-- QR code  -->
                             <div class="header__qr">
-                                <img src="../Shop_project/assets/img/QR_code.png" alt="QR code" class="header__qr-img">
+                                <img src="<?= asset_url('assets/img/QR_code.png'); ?>" alt="QR code" class="header__qr-img">
                                 <div class="header__qr-apps">
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/CH_play.png" alt="CH play" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/CH_play.png'); ?>" alt="CH play" class="header__qr-download-img">
                                     </a>
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/App_store.png" alt="App store" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/App_store.png'); ?>" alt="App store" class="header__qr-download-img">
                                     </a>
                                 </div>
                             </div>
@@ -64,7 +64,7 @@ include './config/url_helper.php';
                                 <ul class="header__notify-list">
                                     <li class="header__notify-item header__notify-item--viewed">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/tv1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/tv1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -74,7 +74,7 @@ include './config/url_helper.php';
 
                                     <li class="header__notify-item header__notify-item--viewed">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/t1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/t1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -84,7 +84,7 @@ include './config/url_helper.php';
 
                                     <li class="header__notify-item">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/tnxh1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/tnxh1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -114,7 +114,7 @@ include './config/url_helper.php';
                         <!-- After Login -->
                         <!-- <div id="after-login__section" style="display: none;">
                             <li class="header__navbar-item header__navbar-user">
-                                <img src="../Shop_project/assets/img/user-img/blank.jpg" alt="" class="header__navbar-user-img">
+                                <img src="<?= asset_url('assets/img/user-img/blank.jpg'); ?>" alt="" class="header__navbar-user-img">
                                 <span class="header__navbar-user-name">Khúc Bảo Minh</span>
 
                                 <ul class="header__navbar-user-menu">
@@ -127,7 +127,7 @@ include './config/url_helper.php';
                                     </li>
 
                                     <li class="header__navbar-user-item header__navbar-user-item--seperate">
-                                        <a href="../Shop_project/config/logout.php">Đăng xuất</a>
+                                        <a href="<?= asset_url('config/logout.php'); ?>">Đăng xuất</a>
                                     </li>
                                 </ul>
                             </li>
@@ -140,7 +140,7 @@ include './config/url_helper.php';
                     <div class="header__logo">
                         <!-- chưa hoàn thiện -->
                         <a href="./index.php" class="header__logo-link">
-                            <img src="../Shop_project/assets/img/logo/logotest1.png" alt="" class="header__logo-img">
+                            <img src="<?= asset_url('assets/img/logo/logotest1.png'); ?>" alt="" class="header__logo-img">
                         </a>
                     </div>
 
@@ -172,7 +172,7 @@ include './config/url_helper.php';
                             <!-- <span class="header__cart-notice">3</span> -->
                             <!-- No cart: header__cart-list--no-cart -->
                             <div class="header__cart-list header__cart-list--no-cart">
-                                <img src="../Shop_project/assets/img/no-cart.png" alt="" class="header__cart-no-cart-img">
+                                <img src="<?= asset_url('assets/img/no-cart.png'); ?>" alt="" class="header__cart-no-cart-img">
                                 <span class="header__cart-list-no-cart-msg">Chưa có sản phẩm</span>
                             </div>
                         </div>
@@ -311,7 +311,7 @@ include './config/url_helper.php';
         <div class="modal__overlay"></div>
         <div class="modal__body">
             <!-- Register Form -->
-            <form action="../Shop_project/config/register.php" method="POST">
+            <form action="<?= asset_url('config/register.php'); ?>" method="POST">
                 <div class="auth-form auth-form-register ">
                     <div class="auth-form__container">
                         <div class="auth-form__header">
@@ -366,7 +366,7 @@ include './config/url_helper.php';
             </form>
 
             <!-- Login Form -->
-            <form action="../Shop_project/config/login.php" method="POST">
+            <form action="<?= asset_url('config/login.php'); ?>" method="POST">
                 <div class="auth-form auth-form-login open">
                     <div class="auth-form__container">
                         <div class="auth-form__header">
