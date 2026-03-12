@@ -73,22 +73,34 @@ function seed_legacy_data(mysqli $conn): void
     }
 
     if (seed_has_table($conn, 'userinfos')) {
-        $check = $conn->query('SELECT COUNT(*) AS total FROM userinfos');
-        $count = (int) ($check->fetch_assoc()['total'] ?? 0);
+        $adminCheck = $conn->prepare("SELECT userID FROM userinfos WHERE userName = ? LIMIT 1");
+        $adminName = 'admin';
+        $adminCheck->bind_param('s', $adminName);
+        $adminCheck->execute();
+        $adminResult = $adminCheck->get_result();
 
-        if ($count === 0) {
-            $stmt = $conn->prepare('INSERT INTO userinfos (userName, userPass, userRole) VALUES (?, ?, ?)');
-            $adminName = 'admin';
+        if ($adminResult && $adminResult->num_rows > 0) {
+            $conn->query("UPDATE userinfos SET userRole = 1 WHERE userName = 'admin'");
+        } else {
+            $stmtAdmin = $conn->prepare('INSERT INTO userinfos (userName, userPass, userRole) VALUES (?, ?, ?)');
             $adminPass = 'admin123';
             $adminRole = 1;
-            $stmt->bind_param('ssi', $adminName, $adminPass, $adminRole);
-            $stmt->execute();
+            $stmtAdmin->bind_param('ssi', $adminName, $adminPass, $adminRole);
+            $stmtAdmin->execute();
+        }
 
-            $userName = 'customer01';
+        $customerCheck = $conn->prepare("SELECT userID FROM userinfos WHERE userName = ? LIMIT 1");
+        $customerName = 'customer01';
+        $customerCheck->bind_param('s', $customerName);
+        $customerCheck->execute();
+        $customerResult = $customerCheck->get_result();
+
+        if (!$customerResult || $customerResult->num_rows === 0) {
+            $stmtUser = $conn->prepare('INSERT INTO userinfos (userName, userPass, userRole) VALUES (?, ?, ?)');
             $userPass = '123456';
             $userRole = 0;
-            $stmt->bind_param('ssi', $userName, $userPass, $userRole);
-            $stmt->execute();
+            $stmtUser->bind_param('ssi', $customerName, $userPass, $userRole);
+            $stmtUser->execute();
         }
     }
 
