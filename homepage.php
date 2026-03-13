@@ -1,5 +1,6 @@
 <?php
 include './config/db_connection.php';
+include './config/url_helper.php';
 
 session_start();
 if (!isset($_SESSION['username'])) {
@@ -7,6 +8,11 @@ if (!isset($_SESSION['username'])) {
     header("Location: ./index.php");
     exit(); // Dừng kịch bản hiện tại
 }
+
+$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$productRenderOutput = '';
+$productRenderErrors = [];
+$catalogDebug = [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,12 +20,12 @@ if (!isset($_SESSION['username'])) {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/base.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/main.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/base.css'); ?>">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/main.css'); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../Shop_project/assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="../Shop_project/assets/img/logo/4482549.jpg">
+    <link rel="icon" href="<?= asset_url('assets/img/logo/4482549.jpg'); ?>">
     <title>BookLand</title>
 </head>
 
@@ -33,13 +39,13 @@ if (!isset($_SESSION['username'])) {
                             Vào cửa hàng trên ứng dụng
                             <!-- QR code  -->
                             <div class="header__qr">
-                                <img src="../Shop_project/assets/img/QR_code.png" alt="QR code" class="header__qr-img">
+                                <img src="<?= asset_url('assets/img/QR_code.png'); ?>" alt="QR code" class="header__qr-img">
                                 <div class="header__qr-apps">
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/CH_play.png" alt="CH play" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/CH_play.png'); ?>" alt="CH play" class="header__qr-download-img">
                                     </a>
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/App_store.png" alt="App store" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/App_store.png'); ?>" alt="App store" class="header__qr-download-img">
                                     </a>
                                 </div>
                             </div>
@@ -68,7 +74,7 @@ if (!isset($_SESSION['username'])) {
                                 <ul class="header__notify-list">
                                     <li class="header__notify-item header__notify-item--viewed">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/tv1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/tv1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -78,7 +84,7 @@ if (!isset($_SESSION['username'])) {
 
                                     <li class="header__notify-item header__notify-item--viewed">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/t1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/t1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -88,7 +94,7 @@ if (!isset($_SESSION['username'])) {
 
                                     <li class="header__notify-item">
                                         <a href="" class="header__notify-link">
-                                            <img src="../Shop_project/assets/img/SGK/tnxh1-cd.jpg" alt="" class="header__notify-img">
+                                            <img src="<?= asset_url('assets/img/SGK/tnxh1-cd.jpg'); ?>" alt="" class="header__notify-img">
                                             <div class="header__notify-info">
                                                 <span class="header__notify-name">Sách Giáo Khoa Tiêng Việt</span>
                                                 <span class="header__notify-desc">Mô tả</span>
@@ -108,33 +114,24 @@ if (!isset($_SESSION['username'])) {
                                 <i class="header__navbar-icon fa-regular fa-circle-question"></i> Trợ giúp</a>
                         </li>
 
-                        <!-- Not Login -->
-                        <div id="not-login__section" style="display: flex;">
-                            <li class="header__navbar-item header__navbar-item-register header__navbar-item--strong header__navbar-item--separate ">Đăng ký</li>
-                            <li class="header__navbar-item header__navbar-item-login header__navbar-item--strong">Đăng nhập</li>
-                        </div>
+                        <li class="header__navbar-item header__navbar-user">
+                            <img src="<?= asset_url('assets/img/user-img/blank.jpg'); ?>" alt="" class="header__navbar-user-img">
+                            <span class="header__navbar-user-name"><?= htmlspecialchars($_SESSION['username'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
 
-                        <!-- After Login -->
-                        <div id="after-login__section" style="display: none;">
-                            <li class="header__navbar-item header__navbar-user">
-                                <img src="../Shop_project/assets/img/user-img/blank.jpg" alt="" class="header__navbar-user-img">
-                                <span class="header__navbar-user-name">Khúc Bảo Minh</span>
+                            <ul class="header__navbar-user-menu">
+                                <li class="header__navbar-user-item">
+                                    <a href="./personalPage.php">Tài khoản của tôi</a>
+                                </li>
 
-                                <ul class="header__navbar-user-menu">
-                                    <li class="header__navbar-user-item">
-                                        <a href="./personalPage.php">Tài khoản của tôi</a>
-                                    </li>
+                                <li class="header__navbar-user-item">
+                                    <a href="./cart.php">Đơn mua</a>
+                                </li>
 
-                                    <li class="header__navbar-user-item">
-                                        <a href="./cart.php">Đơn mua</a>
-                                    </li>
-
-                                    <li class="header__navbar-user-item header__navbar-user-item--seperate">
-                                        <a href="../Shop_project/config/logout.php" onclick="return confirmLogOut();">Đăng xuất</a>
-                                    </li>
-                                </ul>
-                            </li>
-                        </div>
+                                <li class="header__navbar-user-item header__navbar-user-item--seperate">
+                                    <a href="<?= asset_url('config/logout.php'); ?>" onclick="return confirmLogOut();">Đăng xuất</a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
                 </nav>
 
@@ -143,7 +140,7 @@ if (!isset($_SESSION['username'])) {
                     <div class="header__logo">
                         <!-- chưa hoàn thiện -->
                         <a href="./homepage.php" class="header__logo-link">
-                            <img src="../Shop_project/assets/img/logo/logotest1.png" alt="" class="header__logo-img">
+                            <img src="<?= asset_url('assets/img/logo/logotest1.png'); ?>" alt="" class="header__logo-img">
                         </a>
                     </div>
 
@@ -174,7 +171,7 @@ if (!isset($_SESSION['username'])) {
                             <i class="header__cart-icon fa-solid fa-cart-shopping"></i>
                             <!-- No cart: header__cart-list--no-cart -->
                             <div class="header__cart-list">
-                                <img src="../Shop_project/assets/img/no-cart.png" alt="" class="header__cart-no-cart-img">
+                                <img src="<?= asset_url('assets/img/no-cart.png'); ?>" alt="" class="header__cart-no-cart-img">
                                 <span class="header__cart-list-no-cart-msg">Chưa có sản phẩm</span>
 
                                 <h3 class="header__cart-heading">
@@ -202,49 +199,51 @@ if (!isset($_SESSION['username'])) {
                                 Danh mục
                             </h3>
 
+                            <?php $currentCategory = $_GET['category'] ?? 'all'; ?>
+
                             <ul class="category-list">
                                 <li class="category-item">
-                                    <a href="homepage.php?category=all" class="category-item__link">Sản phẩm</a>
+                                    <a href="homepage.php?category=all" class="category-item__link <?= $currentCategory === 'all' ? 'category-item__link--active' : ''; ?>">Sản phẩm</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=sach_giao_khoa" class="category-item__link">Sách giáo khoa</a>
+                                    <a href="homepage.php?category=sach_giao_khoa" class="category-item__link <?= $currentCategory === 'sach_giao_khoa' ? 'category-item__link--active' : ''; ?>">Sách giáo khoa</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=tieu_thuyet" class="category-item__link">Tiểu thuyết</a>
+                                    <a href="homepage.php?category=tieu_thuyet" class="category-item__link <?= $currentCategory === 'tieu_thuyet' ? 'category-item__link--active' : ''; ?>">Tiểu thuyết</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=truyen_tranh" class="category-item__link">Truyện tranh</a>
+                                    <a href="homepage.php?category=truyen_tranh" class="category-item__link <?= $currentCategory === 'truyen_tranh' ? 'category-item__link--active' : ''; ?>">Truyện tranh</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=kinh_doanh" class="category-item__link">Kinh doanh</a>
+                                    <a href="homepage.php?category=kinh_doanh" class="category-item__link <?= $currentCategory === 'kinh_doanh' ? 'category-item__link--active' : ''; ?>">Kinh doanh</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=khoa_hoc" class="category-item__link">Khoa học</a>
+                                    <a href="homepage.php?category=khoa_hoc" class="category-item__link <?= $currentCategory === 'khoa_hoc' ? 'category-item__link--active' : ''; ?>">Khoa học</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=giao_trinh" class="category-item__link">Giáo trình</a>
+                                    <a href="homepage.php?category=giao_trinh" class="category-item__link <?= $currentCategory === 'giao_trinh' ? 'category-item__link--active' : ''; ?>">Giáo trình</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=y_hoc" class="category-item__link">Y học</a>
+                                    <a href="homepage.php?category=y_hoc" class="category-item__link <?= $currentCategory === 'y_hoc' ? 'category-item__link--active' : ''; ?>">Y học</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=tham_khao" class="category-item__link">Sách tham khảo</a>
+                                    <a href="homepage.php?category=tham_khao" class="category-item__link <?= $currentCategory === 'tham_khao' ? 'category-item__link--active' : ''; ?>">Sách tham khảo</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=cong_nghe" class="category-item__link">Công nghệ</a>
+                                    <a href="homepage.php?category=cong_nghe" class="category-item__link <?= $currentCategory === 'cong_nghe' ? 'category-item__link--active' : ''; ?>">Công nghệ</a>
                                 </li>
 
                                 <li class="category-item">
-                                    <a href="homepage.php?category=lich_su" class="category-item__link">Lịch sử</a>
+                                    <a href="homepage.php?category=lich_su" class="category-item__link <?= $currentCategory === 'lich_su' ? 'category-item__link--active' : ''; ?>">Lịch sử</a>
                                 </li>
                             </ul>
                         </nav>
@@ -297,7 +296,24 @@ if (!isset($_SESSION['username'])) {
                             <!-- grid -> row -> col -->
                             <div class="grid__row">
                                 <?php
-                                include './catetory_product-list.php'
+                                if ($debugMode) {
+                                    set_error_handler(static function ($severity, $message, $file, $line) use (&$productRenderErrors): bool {
+                                        $productRenderErrors[] = "[{$severity}] {$message} at {$file}:{$line}";
+
+                                        return false;
+                                    });
+                                }
+
+                                ob_start();
+                                include './catetory_product-list.php';
+                                $productRenderOutput = ob_get_clean();
+
+                                if ($debugMode) {
+                                    restore_error_handler();
+                                }
+
+                                $catalogDebug = $GLOBALS['catalogDebug'] ?? [];
+                                echo $productRenderOutput;
                                 ?>
                             </div>
                         </div>
@@ -316,29 +332,30 @@ if (!isset($_SESSION['username'])) {
     </div>
 
 
+
+    <?php if ($debugMode): ?>
+        <div style="position:fixed;right:12px;bottom:12px;z-index:99999;background:#111;color:#fff;max-width:520px;max-height:45vh;overflow:auto;padding:12px;border-radius:8px;font-size:12px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.35);">
+            <strong>[DEBUG homepage.php]</strong><br>
+            User: <?= htmlspecialchars((string) ($_SESSION['username'] ?? ''), ENT_QUOTES, 'UTF-8'); ?><br>
+            Product HTML length: <?= strlen($productRenderOutput); ?><br>
+            PHP include warnings: <?= count($productRenderErrors); ?><br>
+            SQL error: <?= htmlspecialchars((string) ($catalogDebug['sql_error'] ?? 'none'), ENT_QUOTES, 'UTF-8'); ?><br>
+            Rows: <?= htmlspecialchars((string) ($catalogDebug['num_rows'] ?? 'null'), ENT_QUOTES, 'UTF-8'); ?><br>
+            <?php if (!empty($productRenderErrors)): ?>
+                <pre style="white-space:pre-wrap;color:#ffb4b4;"><?= htmlspecialchars(implode("\n", $productRenderErrors), ENT_QUOTES, 'UTF-8'); ?></pre>
+            <?php endif; ?>
+            <?php if (!empty($catalogDebug)): ?>
+                <pre style="white-space:pre-wrap;color:#9f9;"><?= htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?></pre>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 </body>
+
 
 
 
 <!-- After Login Logic -->
 <script>
-    var username = "<?php echo isset($_SESSION['username']) ? $_SESSION['username'] : ''; ?>";
-
-    if (username !== '' && username != 'admin') {
-        // Hiện phần after-login__section
-        document.getElementById("after-login__section").style.display = "flex";
-        // Ẩn phần not-login__section
-        document.getElementById("not-login__section").style.display = "none";
-        // Hiển thị username
-        document.querySelector(".header__navbar-user-name").textContent = username;
-        console.log("Đăng nhập thành công");
-    } else {
-        // Người dùng chưa đăng nhập, hiển thị phần not-login__section và ẩn phần after-login__section
-        document.getElementById("not-login__section").style.display = "flex";
-        document.getElementById("after-login__section").style.display = "none";
-        console.log('Người dùng chưa đăng nhập');
-    }
-
     function confirmLogOut() {
         return window.confirm("Bạn Có Muốn Đăng Xuất Hay Không???");
     }
@@ -361,6 +378,26 @@ if (!isset($_SESSION['username'])) {
             cartList.classList.remove('header__cart-list--no-cart');
         }
     });
+
+    <?php if ($debugMode): ?>
+    window.addEventListener('error', function(event) {
+        console.error('[DEBUG][window.error]', {
+            message: event.message,
+            source: event.filename,
+            line: event.lineno,
+            column: event.colno,
+            stack: event.error ? event.error.stack : null
+        });
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+        console.error('[DEBUG][unhandledrejection]', event.reason);
+    });
+
+    console.warn('[DEBUG] Nếu bạn thấy lỗi "Unchecked runtime.lastError...", thường là từ extension trình duyệt, không phải PHP app.');
+    const phpDebug = <?= json_encode($catalogDebug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    console.log('[DEBUG][PHP catalogDebug]', phpDebug);
+    <?php endif; ?>
 
     const container = document.querySelector('.app__container');
     container.addEventListener('click', function() {

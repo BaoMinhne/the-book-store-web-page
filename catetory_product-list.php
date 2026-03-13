@@ -1,95 +1,164 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['bookName'])) {
-    $searchName = $_POST['bookName'];
-    $query = "SELECT * FROM Books 
-    JOIN publishers ON Books.pubID = publishers.pubID 
-    JOIN origins ON books.oriID = origins.oriID
-    WHERE Books.bookName LIKE '%$searchName%'";
-} else {
-    if (isset($_GET['category'])) {
-        // Lấy giá trị của tham số danh mục từ URL
-        $category = $_GET['category'];
-        switch ($category) {
-            case 'sach_giao_khoa':
-                // Truy vấn sách giáo khoa
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'SGK' ORDER BY bookID ASC";
-                break;
+$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$catalogDebug = [
+    'tables' => [],
+    'columns' => [],
+    'query' => null,
+    'num_rows' => null,
+    'sql_error' => null,
+    'message' => null,
+];
 
-            case 'tieu_thuyet':
-                // Truy vấn tiểu thuyết
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'TT' ORDER BY bookID ASC";
-                break;
-
-            case 'truyen_tranh':
-                // Truy vấn truyện tranh
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'TRT' ORDER BY bookID ASC";
-                break;
-
-            case 'kinh_doanh':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'KD' ORDER BY bookID ASC";
-                break;
-
-            case 'khoa_hoc':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'KH' ORDER BY bookID ASC";
-                break;
-
-            case 'giao_trinh':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'GT' ORDER BY bookID ASC";
-                break;
-
-            case 'y_hoc':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'YH' ORDER BY bookID ASC";
-                break;
-
-            case 'tham_khao':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'STK' ORDER BY bookID ASC";
-                break;
-
-            case 'cong_nghe':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'CN' ORDER BY bookID ASC";
-                break;
-
-            case 'lich_su':
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID WHERE genID = 'LS' ORDER BY bookID ASC";
-                break;
-
-            case 'all':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookID ASC";
-                break;
-
-            case 'small_to_large':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookPrice ASC";
-                break;
-
-            case 'large_to_small':
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookPrice DESC";
-                break;
-
-            default:
-                // Nếu không phải là một loại danh mục hợp lệ, hiển thị tất cả sản phẩm
-                $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID ORDER BY bookID ASC";
-                break;
+function find_first_table(mysqli $conn, array $candidates): ?string
+{
+    foreach ($candidates as $table) {
+        $escaped = $conn->real_escape_string($table);
+        $check = $conn->query("SHOW TABLES LIKE '{$escaped}'");
+        if ($check && $check->num_rows > 0) {
+            return $table;
         }
-    } else {
-        $query = "SELECT * FROM Books join publishers on Books.pubID = publishers.pubID join origins on books.oriID = origins.oriID";
     }
-    // Truy vấn cơ sở dữ liệu để lấy dữ liệu từ bảng Books
+
+    return null;
 }
 
+function find_first_column(mysqli $conn, string $table, array $candidates): ?string
+{
+    foreach ($candidates as $column) {
+        $escapedTable = str_replace('`', '``', $table);
+        $escapedColumn = $conn->real_escape_string($column);
+        $check = $conn->query("SHOW COLUMNS FROM `{$escapedTable}` LIKE '{$escapedColumn}'");
+        if ($check && $check->num_rows > 0) {
+            return $column;
+        }
+    }
+
+    return null;
+}
+
+$booksTable = find_first_table($conn, ['books', 'BOOKS']);
+$publishersTable = find_first_table($conn, ['publishers', 'PUBLISHERS']);
+$originsTable = find_first_table($conn, ['origins', 'ORIGINS']);
+
+$catalogDebug['tables'] = [
+    'books' => $booksTable,
+    'publishers' => $publishersTable,
+    'origins' => $originsTable,
+];
+
+if (!$booksTable || !$publishersTable || !$originsTable) {
+    $catalogDebug['message'] = 'Cấu trúc dữ liệu chưa đúng hoặc thiếu bảng cần thiết.';
+    $GLOBALS['catalogDebug'] = $catalogDebug;
+    echo $catalogDebug['message'];
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+    return;
+}
+
+$bookIdCol = find_first_column($conn, $booksTable, ['bookID', 'BOOK_ID']);
+$bookNameCol = find_first_column($conn, $booksTable, ['bookName', 'BOOK_Name']);
+$bookPriceCol = find_first_column($conn, $booksTable, ['bookPrice', 'BOOK_PRICE']);
+$bookQuantityCol = find_first_column($conn, $booksTable, ['bookQuantity', 'BOOK_Amount']);
+$bookImageCol = find_first_column($conn, $booksTable, ['bgURL', 'bookImage', 'BOOK_Image']);
+$bookGenreCol = find_first_column($conn, $booksTable, ['genID', 'GEN_ID']);
+$bookPubFkCol = find_first_column($conn, $booksTable, ['pubID', 'PUB_ID']);
+$bookOriFkCol = find_first_column($conn, $booksTable, ['oriID', 'ORI_ID']);
+
+$pubJoinCol = find_first_column($conn, $publishersTable, ['pubID', 'PUB_ID']);
+$pubBrandCol = find_first_column($conn, $publishersTable, ['pubID', 'pubName', 'PUB_ID', 'PUB_Name']);
+$oriJoinCol = find_first_column($conn, $originsTable, ['oriID', 'ORI_ID']);
+$oriNameCol = find_first_column($conn, $originsTable, ['oriName', 'ORI_Name']);
+
+$catalogDebug['columns'] = [
+    'bookIdCol' => $bookIdCol,
+    'bookNameCol' => $bookNameCol,
+    'bookPriceCol' => $bookPriceCol,
+    'bookQuantityCol' => $bookQuantityCol,
+    'bookImageCol' => $bookImageCol,
+    'bookGenreCol' => $bookGenreCol,
+    'bookPubFkCol' => $bookPubFkCol,
+    'bookOriFkCol' => $bookOriFkCol,
+    'pubJoinCol' => $pubJoinCol,
+    'pubBrandCol' => $pubBrandCol,
+    'oriJoinCol' => $oriJoinCol,
+    'oriNameCol' => $oriNameCol,
+];
+
+if (!$bookIdCol || !$bookNameCol || !$bookPriceCol || !$bookQuantityCol || !$bookImageCol || !$bookGenreCol || !$bookPubFkCol || !$bookOriFkCol || !$pubJoinCol || !$pubBrandCol || !$oriJoinCol || !$oriNameCol) {
+    $catalogDebug['message'] = 'Cấu trúc dữ liệu chưa đúng hoặc thiếu cột cần thiết.';
+    $GLOBALS['catalogDebug'] = $catalogDebug;
+    echo $catalogDebug['message'];
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+    return;
+}
+
+$baseQuery = "SELECT b.`{$bookIdCol}` AS bookID, b.`{$bookNameCol}` AS bookName, b.`{$bookPriceCol}` AS bookPrice, b.`{$bookQuantityCol}` AS bookQuantity, b.`{$bookImageCol}` AS bgURL, p.`{$pubBrandCol}` AS pubBrand, o.`{$oriNameCol}` AS oriName FROM `{$booksTable}` b JOIN `{$publishersTable}` p ON b.`{$bookPubFkCol}` = p.`{$pubJoinCol}` JOIN `{$originsTable}` o ON b.`{$bookOriFkCol}` = o.`{$oriJoinCol}`";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bookName'])) {
+    $searchName = $conn->real_escape_string($_POST['bookName']);
+    $query = $baseQuery . " WHERE b.`{$bookNameCol}` LIKE '%{$searchName}%'";
+} else {
+    $category = $_GET['category'] ?? null;
+    switch ($category) {
+        case 'sach_giao_khoa':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'SGK' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'tieu_thuyet':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'truyen_tranh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'TRT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'kinh_doanh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KD' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'khoa_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'KH' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'giao_trinh':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'GT' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'y_hoc':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'YH' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'tham_khao':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'STK' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'cong_nghe':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'CN' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'lich_su':
+            $query = $baseQuery . " WHERE b.`{$bookGenreCol}` = 'LS' ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+        case 'small_to_large':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` ASC";
+            break;
+        case 'large_to_small':
+            $query = $baseQuery . " ORDER BY b.`{$bookPriceCol}` DESC";
+            break;
+        case 'all':
+        default:
+            $query = $baseQuery . " ORDER BY b.`{$bookIdCol}` ASC";
+            break;
+    }
+}
+
+$catalogDebug['query'] = $query;
 $result = mysqli_query($conn, $query);
-// Kiểm tra xem có dữ liệu được trả về không
-if (mysqli_num_rows($result) > 0) {
-    // Duyệt qua từng hàng dữ liệu và tạo thẻ div tương ứng
+if ($result && mysqli_num_rows($result) > 0) {
+    $catalogDebug['num_rows'] = mysqli_num_rows($result);
     while ($row = mysqli_fetch_assoc($result)) {
-        $bookPrice = $row['bookPrice'];
+        $bookPrice = (int) ($row['bookPrice'] ?? 0);
         $formattedPrice = number_format($bookPrice, 0, ',', '.');
         echo '<div class="grid__column-2-4">';
+        $imageRaw = trim((string) ($row['bgURL'] ?? ''));
+        $safeImage = $imageRaw !== '' ? $imageRaw : asset_url('assets/img/logo/logo2.png');
         echo '<a class="home-product-item" href="detailProduct.php?id=' . $row['bookID'] . '">';
-        echo '<div class="home-product-item__img" style="background-image: url(' . $row['bgURL'] . ');"></div>';
-        echo '<h4 class="home-product-item__name">' . $row['bookName'] . '</h4>';
+        echo '<div class="home-product-item__img" style="background-image: url(' . htmlspecialchars($safeImage, ENT_QUOTES) . ');"></div>';
+        echo '<h4 class="home-product-item__name">' . htmlspecialchars((string) $row['bookName']) . '</h4>';
         echo '<div class="home-product-item__price">';
         echo '<span class="home-product-item__price-new">' . $formattedPrice . 'đ</span>';
         echo '</div>';
@@ -107,7 +176,7 @@ if (mysqli_num_rows($result) > 0) {
         echo '<span class="home-product-item__sold">' . $row['bookQuantity'] . ' Còn Lại  </span>';
         echo '</div>';
         echo '<div class="home-product-item__origin">';
-        echo '<span class="home-product-item__brand">' . $row['pubID'] . '</span>';
+        echo '<span class="home-product-item__brand">' . $row['pubBrand'] . '</span>';
         echo '<span class="home-product-item__origin">' . $row['oriName'] . '</span>';
         echo '</div>';
         echo '<div class="home-product-item__favourite">';
@@ -118,12 +187,44 @@ if (mysqli_num_rows($result) > 0) {
         echo '</div>';
     }
 } else {
-    // Hiển thị thông báo nếu không có dữ liệu
-    echo 'Không có dữ liệu.';
-    echo "Error: " . $sql_query->error; // Hiển thị lỗi SQL nếu có
-    echo "Error: " . $conn->error; // Hiển thị lỗi kết nối nếu có
+    $catalogDebug['num_rows'] = $result ? 0 : null;
+    $catalogDebug['sql_error'] = $conn->error ?: null;
+    $catalogDebug['message'] = 'Không có dữ liệu sản phẩm phù hợp.';
+
+    $selectedCategory = $_GET['category'] ?? 'all';
+    $categoryLabelMap = [
+        'all' => 'Tất cả sản phẩm',
+        'sach_giao_khoa' => 'Sách giáo khoa',
+        'tieu_thuyet' => 'Tiểu thuyết',
+        'truyen_tranh' => 'Truyện tranh',
+        'kinh_doanh' => 'Kinh doanh',
+        'khoa_hoc' => 'Khoa học',
+        'giao_trinh' => 'Giáo trình',
+        'y_hoc' => 'Y học',
+        'tham_khao' => 'Sách tham khảo',
+        'cong_nghe' => 'Công nghệ',
+        'lich_su' => 'Lịch sử',
+        'small_to_large' => 'Giá tăng dần',
+        'large_to_small' => 'Giá giảm dần',
+    ];
+    $selectedCategoryLabel = $categoryLabelMap[$selectedCategory] ?? 'Bộ lọc hiện tại';
+
+    echo '<div class="home-empty-state">';
+    echo '  <div class="home-empty-state__icon"><i class="fa-solid fa-box-open"></i></div>';
+    echo '  <h3 class="home-empty-state__title">Chưa có sản phẩm để hiển thị</h3>';
+    echo '  <p class="home-empty-state__desc">Danh mục <strong>' . htmlspecialchars($selectedCategoryLabel, ENT_QUOTES, 'UTF-8') . '</strong> hiện chưa có dữ liệu hoặc chưa phù hợp với từ khóa tìm kiếm.</p>';
+    echo '  <div class="home-empty-state__actions">';
+    echo '      <a href="homepage.php?category=all" class="home-empty-state__btn home-empty-state__btn--primary">Xem tất cả sản phẩm</a>';
+    echo '      <a href="homepage.php" class="home-empty-state__btn">Đặt lại bộ lọc</a>';
+    echo '  </div>';
+    echo '</div>';
+
+    if ($conn->error) {
+        echo '<p class="home-empty-state__error">SQL Error: ' . htmlspecialchars($conn->error, ENT_QUOTES, 'UTF-8') . '</p>';
+    }
+    if ($debugMode) {
+        echo '<pre style="background:#111;color:#9f9;padding:10px;border-radius:6px;white-space:pre-wrap;">' . htmlspecialchars(json_encode($catalogDebug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
 }
 
-
-// Đóng kết nối cơ sở dữ liệu
-mysqli_close($conn);
+$GLOBALS['catalogDebug'] = $catalogDebug;

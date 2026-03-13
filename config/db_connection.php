@@ -5,17 +5,21 @@ $username = "root";
 $password = "orcl";
 $database = "bookstore";
 
-// Tạo kết nối
-$conn = mysqli_connect($servername, $username, $password, $database);
-// echo "<script> console.log('Kết Nối Thành Công'); </script>";
+$conn = mysqli_init();
 
-
-// Kiểm tra kết nối
 if (!$conn) {
-    die("Kết nối thất bại: " . mysqli_connect_error());
-} else {
+    die("Không thể khởi tạo kết nối cơ sở dữ liệu.");
 }
 
+mysqli_options($conn, MYSQLI_OPT_CONNECT_TIMEOUT, 5);
 
-// Đóng kết nối
-// mysqli_close($conn);
+if (!mysqli_real_connect($conn, $servername, $username, $password, $database)) {
+    die("Kết nối thất bại: " . mysqli_connect_error());
+}
+
+if (!mysqli_set_charset($conn, 'utf8mb4')) {
+    die("Không thể thiết lập charset utf8mb4.");
+}
+
+require_once __DIR__ . '/auto_seed.php';
+run_auto_seed($conn);

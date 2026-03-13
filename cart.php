@@ -1,6 +1,7 @@
 <?php
 session_start();
 include './config/db_connection.php';
+include './config/url_helper.php';
 
 if (!isset($_SESSION['username'])) {
     // Chuyển hướng người dùng đến trang đăng nhập
@@ -16,13 +17,13 @@ if (!isset($_SESSION['username'])) {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/base.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/main.css">
-    <link rel="stylesheet" href="../Shop_project/assets/css/cart.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/base.css'); ?>">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/main.css'); ?>">
+    <link rel="stylesheet" href="<?= asset_url('assets/css/cart.css'); ?>">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../Shop_project/assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css">
+    <link rel="stylesheet" href="<?= asset_url('assets/fonts/fontawesome-free-6.5.1-web/css/all.min.css'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="../Shop_project/assets/img/logo/4482549.jpg">
+    <link rel="icon" href="<?= asset_url('assets/img/logo/4482549.jpg'); ?>">
     <title>BookLand</title>
 </head>
 
@@ -36,13 +37,13 @@ if (!isset($_SESSION['username'])) {
                             Vào cửa hàng trên ứng dụng
                             <!-- QR code  -->
                             <div class="header__qr">
-                                <img src="../Shop_project/assets/img/QR_code.png" alt="QR code" class="header__qr-img">
+                                <img src="<?= asset_url('assets/img/QR_code.png'); ?>" alt="QR code" class="header__qr-img">
                                 <div class="header__qr-apps">
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/CH_play.png" alt="CH play" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/CH_play.png'); ?>" alt="CH play" class="header__qr-download-img">
                                     </a>
                                     <a href="" class="header__qr-link">
-                                        <img src="../Shop_project/assets/img/App_store.png" alt="App store" class="header__qr-download-img">
+                                        <img src="<?= asset_url('assets/img/App_store.png'); ?>" alt="App store" class="header__qr-download-img">
                                     </a>
                                 </div>
                             </div>
@@ -75,7 +76,7 @@ if (!isset($_SESSION['username'])) {
                         <!-- After Login -->
                         <div id="after-login__section" style="display: flex;">
                             <li class="header__navbar-item header__navbar-user">
-                                <img src="../Shop_project/assets/img/user-img/blank.jpg" alt="" class="header__navbar-user-img">
+                                <img src="<?= asset_url('assets/img/user-img/blank.jpg'); ?>" alt="" class="header__navbar-user-img">
                                 <span class="header__navbar-user-name"></span>
 
                                 <ul class="header__navbar-user-menu">
@@ -93,7 +94,7 @@ if (!isset($_SESSION['username'])) {
                                     </li>
 
                                     <li class="header__navbar-user-item header__navbar-user-item--seperate">
-                                        <a href="../Shop_project/config/logout.php">Đăng xuất</a>
+                                        <a href="<?= asset_url('config/logout.php'); ?>">Đăng xuất</a>
                                     </li>
                                 </ul>
                             </li>
@@ -106,7 +107,7 @@ if (!isset($_SESSION['username'])) {
                     <div class="header__logo">
                         <!-- chưa hoàn thiện -->
                         <a href="./homepage.php" class="header__logo-link">
-                            <img src="../Shop_project/assets/img/logo/logotest1.png" alt="" class="header__logo-img">
+                            <img src="<?= asset_url('assets/img/logo/logotest1.png'); ?>" alt="" class="header__logo-img">
                         </a>
                     </div>
 
@@ -136,7 +137,7 @@ if (!isset($_SESSION['username'])) {
                             <i class="header__cart-icon fa-solid fa-cart-shopping"></i>
                             <!-- No cart: header__cart-list--no-cart -->
                             <div class="header__cart-list">
-                                <img src="../Shop_project/assets/img/no-cart.png" alt="" class="header__cart-no-cart-img">
+                                <img src="<?= asset_url('assets/img/no-cart.png'); ?>" alt="" class="header__cart-no-cart-img">
                                 <span class="header__cart-list-no-cart-msg">Chưa có sản phẩm</span>
 
                                 <h3 class="header__cart-heading">

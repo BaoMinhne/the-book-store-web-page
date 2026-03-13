@@ -1,23 +1,30 @@
 <?php
 require './config/db_connection.php';
 
-$bookname = $_GET['bookName'];
+$bookname = trim($_GET['bookName'] ?? '');
 
-$sql_query = "SELECT * FROM bookstore.books where bookName like '%$bookname%'";
-$result = mysqli_query($conn, $sql_query);
+if ($bookname === '') {
+    header('Content-Type: application/json');
+    echo json_encode([]);
+    exit();
+}
 
+$searchKeyword = "%{$bookname}%";
+$sql_query = $conn->prepare('SELECT * FROM bookstore.books WHERE bookName LIKE ?');
+$sql_query->bind_param('s', $searchKeyword);
+$sql_query->execute();
+$result = $sql_query->get_result();
 
 if ($result && mysqli_num_rows($result) > 0) {
-    $rows = array();
+    $rows = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $rows[] = $row;
     }
-    header("Content-Type: application/json");
-    $json_data = json_encode($rows);
-    echo $json_data;
-    exit();
-} else {
-    header("Content-Type: application/json");
-    echo json_encode(array('error' => 'No data found'));
+    header('Content-Type: application/json');
+    echo json_encode($rows);
     exit();
 }
+
+header('Content-Type: application/json');
+echo json_encode([]);
+exit();
