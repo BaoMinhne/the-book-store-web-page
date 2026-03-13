@@ -3,6 +3,10 @@ let activeSearchController = null;
 
 function renderSearchMessage(message) {
     const resultSearchList = document.getElementById('header__search-list');
+    if (!resultSearchList) {
+        return;
+    }
+
     resultSearchList.innerHTML = '';
 
     const item = document.createElement('li');
@@ -13,6 +17,10 @@ function renderSearchMessage(message) {
 
 function renderSearchResults(data) {
     const resultSearchList = document.getElementById('header__search-list');
+    if (!resultSearchList) {
+        return;
+    }
+
     resultSearchList.innerHTML = '';
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -21,6 +29,10 @@ function renderSearchResults(data) {
     }
 
     data.forEach((book) => {
+        if (!book || !book.bookID || !book.bookName) {
+            return;
+        }
+
         const listItem = document.createElement('li');
         listItem.classList.add('header__search-history-item');
 
@@ -31,6 +43,23 @@ function renderSearchResults(data) {
         listItem.appendChild(link);
         resultSearchList.appendChild(listItem);
     });
+}
+
+function parseSearchResponse(rawText) {
+    try {
+        return JSON.parse(rawText);
+    } catch (_error) {
+        // fallback khi response lẫn warning/notice trước JSON
+        const firstBracket = rawText.indexOf('[');
+        const lastBracket = rawText.lastIndexOf(']');
+
+        if (firstBracket !== -1 && lastBracket !== -1 && firstBracket <= lastBracket) {
+            const jsonChunk = rawText.slice(firstBracket, lastBracket + 1);
+            return JSON.parse(jsonChunk);
+        }
+
+        return [];
+    }
 }
 
 function search() {
@@ -55,14 +84,21 @@ function search() {
         activeSearchController = new AbortController();
         const searchURL = `HienThiKQTK.php?bookName=${encodeURIComponent(keyword)}`;
 
-        fetch(searchURL, { signal: activeSearchController.signal })
+        fetch(searchURL, {
+            signal: activeSearchController.signal,
+            headers: {
+                Accept: 'application/json',
+            },
+        })
             .then((response) => {
                 if (!response.ok) {
                     throw new Error('Search request failed');
                 }
-                return response.json();
+
+                return response.text();
             })
-            .then((data) => {
+            .then((rawText) => {
+                const data = parseSearchResponse(rawText);
                 renderSearchResults(data);
             })
             .catch((error) => {
